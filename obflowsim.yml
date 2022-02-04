@@ -1,0 +1,21 @@
+name: obflowsim
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - numpy
+  - pandas
+  - simpy
+  - scikit-learn
+  - matplotlib
+  - jupyterlab
+  - networkx
+  - statsmodels
+  - pyyaml
+  - scipy
+  - pytest
+  - cookiecutter
+  - pip
+
+    
+    
