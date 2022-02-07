@@ -2878,4 +2878,3 @@ python obflow_sim.py input/exp12/config/scenario_2877.yaml --loglevel=WARNING
 python obflow_sim.py input/exp12/config/scenario_2878.yaml --loglevel=WARNING
 python obflow_sim.py input/exp12/config/scenario_2879.yaml --loglevel=WARNING
 python obflow_sim.py input/exp12/config/scenario_2880.yaml --loglevel=WARNING
-#python obflow_stat.py output/exp12 exp12 --run_time 9000 --warmup_time 2400 --include_inputs --scenario_inputs_path input/exp12/exp12_obflowsim_metainputs.csv --process_logs --stop_log_path ./output/exp12/logs --occ_stats_path ./output/exp12/stats

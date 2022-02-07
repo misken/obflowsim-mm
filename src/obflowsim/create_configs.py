@@ -51,7 +51,7 @@ def config_from_csv(exp_suffix_, scenarios_csv_path_, settings_path_, config_pat
 
             config['scenario'] = scenario
             config['run_settings'] = settings['run_settings']
-            config['paths'] = settings['paths']
+            config['output'] = settings['output']
             config['random_number_streams'] = settings['random_number_streams']
 
             config['routes'] = settings['routes']
@@ -66,13 +66,13 @@ def config_from_csv(exp_suffix_, scenarios_csv_path_, settings_path_, config_pat
             bat_file.write(run_line)
 
         # Create output file processing line
-        output_proc_line = f'python obflow_stat.py {output_path_} {exp_suffix_} '
-        output_proc_line += f"--run_time {settings['run_settings']['run_time']} "
-        output_proc_line += f"--warmup_time {settings['run_settings']['warmup_time']} --include_inputs "
-        output_proc_line += f"--scenario_inputs_path {scenarios_csv_path_} --process_logs "
-        output_proc_line += f"--stop_log_path {settings['paths']['stop_logs']} "
-        output_proc_line += f"--occ_stats_path {settings['paths']['occ_stats']}"
-        bat_file.write(output_proc_line)
+        # output_proc_line = f'python obflow_stat.py {output_path_} {exp_suffix_} '
+        # output_proc_line += f"--run_time {settings['run_settings']['run_time']} "
+        # output_proc_line += f"--warmup_time {settings['run_settings']['warmup_time']} --include_inputs "
+        # output_proc_line += f"--scenario_inputs_path {scenarios_csv_path_} --process_logs "
+        # output_proc_line += f"--stop_log_path {settings['paths']['stop_logs']} "
+        # output_proc_line += f"--occ_stats_path {settings['paths']['occ_stats']}"
+        # bat_file.write(output_proc_line)
 
 
 if __name__ == '__main__':

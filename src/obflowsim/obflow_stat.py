@@ -10,7 +10,7 @@ from statsmodels.stats.weightstats import DescrStatsW
 from scipy.stats import t
 
 
-def compute_occ_stats(obsystem, end_time, egress=False, log_path=None, warmup=0,
+def compute_occ_stats(obsystem, end_time, warmup=0,
                       quantiles=(0.05, 0.25, 0.5, 0.75, 0.95, 0.99)):
     """
     Compute occupancy statistics by unit
@@ -64,17 +64,9 @@ def compute_occ_stats(obsystem, end_time, egress=False, log_path=None, warmup=0,
 
     # Combine unit specific occupancy stats
     occ_stats_df = pd.concat(occ_stats_dfs)
+    occ_df = pd.concat(occ_dfs)
 
-    # Export raw occupancy logs to csv
-    if log_path is not None:
-        occ_df = pd.concat(occ_dfs)
-        if egress:
-            occ_df.to_csv(log_path, index=False)
-        else:
-            occ_df[(occ_df['unit'] != 'ENTRY') &
-                   (occ_df['unit'] != 'EXIT')].to_csv(log_path, index=False)
-
-    return occ_stats_df
+    return occ_stats_df, occ_df
 
 
 def num_gt_0(column):
@@ -480,6 +472,164 @@ def varsum(df, unit, pm, alpha):
 
     return pm_varsum_df
 
+
+def process_stop_log(scenario_num, rep_num, obsystem,  occ_stats_path, run_time, warmup=0):
+    """
+    Creates and writes out summary by scenario and replication to csv
+
+    Parameters
+    ----------
+
+
+    Returns
+    -------
+    Dict of summary stats for this scenario and rep
+
+    """
+
+    start_analysis = warmup
+    end_analysis = run_time
+    num_days = (run_time - warmup) / 24.0
+
+    results = []
+    active_units = []
+
+    print(scenario_num, rep_num)
+
+    # Read the log file and filter by included categories
+    stops_df = pd.DataFrame(obsystem.stops_timestamps_list)
+
+    stops_df = stops_df[(stops_df['entry_ts'] <= end_analysis) & (stops_df['exit_ts'] >= start_analysis)]
+
+    # LOS means and sds - planned and actual
+    stops_df_grp_unit = stops_df.groupby(['unit'])
+    plos_mean = stops_df_grp_unit['planned_los'].mean()
+    plos_sd = stops_df_grp_unit['planned_los'].std()
+    plos_skew = stops_df_grp_unit['planned_los'].skew()
+    plos_kurt = stops_df_grp_unit['planned_los'].apply(pd.DataFrame.kurt)
+
+    actlos_mean = stops_df_grp_unit['exit_enter'].mean()
+    actlos_sd = stops_df_grp_unit['exit_enter'].std()
+    actlos_skew = stops_df_grp_unit['exit_enter'].skew()
+    actlos_kurt = stops_df_grp_unit['exit_enter'].apply(pd.DataFrame.kurt)
+
+    grp_all = stops_df.groupby(['unit'])
+    grp_blocked = stops_df[(stops_df['entry_tryentry'] > 0)].groupby(['unit'])
+
+    blocked_uncond_stats = grp_all['entry_tryentry'].apply(get_stats, 'delay_')
+    blocked_cond_stats = grp_blocked['entry_tryentry'].apply(get_stats, 'delay_')
+
+    # Create new summary record as dict
+    newrec = {'scenario': scenario_num}
+
+    newrec['rep'] = rep_num
+    newrec['num_days'] = num_days
+
+    # Number of visits to each unit
+    units = grp_all.groups.keys()
+    for unit in units:
+        # if (unit, 'delay_count') in blocked_uncond_stats.index:
+        #     newrec[f'num_visits_{unit.lower()}'] = blocked_uncond_stats[(unit, 'delay_count')]
+        # else:
+        #     newrec[f'num_visits_{unit.lower()}'] = 0
+
+        newrec[f'num_visits_{unit.lower()}'] = stops_df_grp_unit['entry_ts'].count()[unit]
+
+        # LOS stats for each unit
+    for unit in units:
+        if newrec[f'num_visits_{unit.lower()}'] > 0:
+            active_units.append(unit)
+
+            newrec[f'planned_los_mean_{unit.lower()}'] = plos_mean[unit]
+            newrec[f'actual_los_mean_{unit.lower()}'] = actlos_mean[unit]
+            newrec[f'planned_los_sd_{unit.lower()}'] = plos_sd[unit]
+            newrec[f'actual_los_sd_{unit.lower()}'] = actlos_sd[unit]
+
+            if plos_mean[unit] > 0:
+                newrec[f'planned_los_cv2_{unit.lower()}'] = (plos_sd[unit] / plos_mean[unit]) ** 2
+            else:
+                newrec[f'planned_los_cv2_{unit.lower()}'] = 0.0
+
+            if actlos_mean[unit] > 0:
+                newrec[f'actual_los_cv2_{unit.lower()}'] = (actlos_sd[unit] / actlos_mean[unit]) ** 2
+            else:
+                newrec[f'actual_los_cv2_{unit.lower()}'] = 0.0
+
+            newrec[f'planned_los_skew_{unit.lower()}'] = plos_skew[unit]
+            newrec[f'actual_los_skew_{unit.lower()}'] = actlos_skew[unit]
+            newrec[f'planned_los_kurt_{unit.lower()}'] = plos_kurt[unit]
+            newrec[f'actual_los_kurt_{unit.lower()}'] = actlos_kurt[unit]
+
+    # Interarrival time stats for each unit
+    for unit in units:
+        if newrec[f'num_visits_{unit.lower()}'] > 0:
+            arrtimes_unit = stops_df.loc[stops_df.unit == unit, 'request_entry_ts']
+            # Make sure arrival times are sorted to compute interarrival times
+            arrtimes_unit.sort_values(inplace=True)
+            iatimes_unit = arrtimes_unit.diff(1)[1:]
+
+            newrec[f'iatime_mean_{unit.lower()}'] = iatimes_unit.mean()
+            newrec[f'iatime_sd_{unit.lower()}'] = iatimes_unit.std()
+            newrec[f'iatime_skew_{unit.lower()}'] = iatimes_unit.skew()
+            newrec[f'iatime_kurt_{unit.lower()}'] = iatimes_unit.kurtosis()
+
+    # Get occ from occ stats summaries
+    #occ_stats_fn = Path(occ_stats_path) / f"unit_occ_stats_scenario_{scenario_num}_rep_{rep_num}.csv"
+    occ_stats_df = pd.read_csv(occ_stats_path, index_col=0)
+    for unit in units:
+        if newrec[f'num_visits_{unit.lower()}'] > 0:
+            newrec[f'occ_mean_{unit.lower()}'] = occ_stats_df.loc[unit]['mean_occ']
+            newrec[f'occ_stdev_{unit.lower()}'] = occ_stats_df.loc[unit]['sd_occ']
+            newrec[f'occ_p05_{unit.lower()}'] = occ_stats_df.loc[unit]['p05_occ']
+            newrec[f'occ_p25_{unit.lower()}'] = occ_stats_df.loc[unit]['p25_occ']
+            newrec[f'occ_p50_{unit.lower()}'] = occ_stats_df.loc[unit]['p50_occ']
+            newrec[f'occ_p75_{unit.lower()}'] = occ_stats_df.loc[unit]['p75_occ']
+            newrec[f'occ_p95_{unit.lower()}'] = occ_stats_df.loc[unit]['p95_occ']
+            newrec[f'occ_p99_{unit.lower()}'] = occ_stats_df.loc[unit]['p99_occ']
+            newrec[f'occ_min_{unit.lower()}'] = occ_stats_df.loc[unit]['min_occ']
+            newrec[f'occ_max_{unit.lower()}'] = occ_stats_df.loc[unit]['max_occ']
+
+    newrec['prob_blockedby_ldr'] = \
+        blocked_uncond_stats[('LDR', 'delay_num_gt_0')] / blocked_uncond_stats[('LDR', 'delay_count')]
+
+    if ('LDR', 'delay_mean') in blocked_cond_stats.index:
+        newrec['blockedby_ldr_mean'] = blocked_cond_stats[('LDR', 'delay_mean')]
+        newrec['blockedby_ldr_p95'] = blocked_cond_stats[('LDR', 'delay_p95')]
+    else:
+        newrec['blockedby_ldr_mean'] = 0.0
+        newrec['blockedby_ldr_p95'] = 0.0
+
+    newrec['pct_blocked_by_pp'] = \
+        blocked_uncond_stats[('PP', 'delay_num_gt_0')] / blocked_uncond_stats[('PP', 'delay_count')]
+
+    if ('PP', 'delay_mean') in blocked_cond_stats.index:
+        newrec['blockedby_pp_mean'] = blocked_cond_stats[('PP', 'delay_mean')]
+        newrec['blockedby_pp_p95'] = blocked_cond_stats[('PP', 'delay_p95')]
+    else:
+        newrec['blockedby_pp_mean'] = 0.0
+        newrec['blockedby_pp_p95'] = 0.0
+
+    newrec['timestamp'] = str(datetime.now())
+
+    print(newrec)
+    return(newrec)
+
+    # results.append(newrec)
+    #
+    # json_stats_path = output_path / 'json'
+    # json_stats_path.mkdir(exist_ok=True)
+    #
+    # output_json_file = json_stats_path / f'output_stats_scenario_{scenario_num}_rep_{rep_num}.json'
+    # with open(output_json_file, 'w') as json_output:
+    #     json_output.write(str(newrec) + '\n')
+    #
+    # scenario_rep_summary_df = pd.DataFrame(results)
+    #
+    # output_csv_file = output_path / f'{output_file_stem}.csv'
+    # scenario_rep_summary_df = scenario_rep_summary_df.sort_values(by=['scenario', 'rep'])
+    # scenario_rep_summary_df.to_csv(output_csv_file, index=False)
+
+    return active_units
 
 def process_command_line(argv=None):
     """

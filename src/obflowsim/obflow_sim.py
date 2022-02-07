@@ -5,6 +5,7 @@ from copy import deepcopy
 from pathlib import Path
 import argparse
 
+import pandas as pd
 import simpy
 from numpy.random import default_rng
 import networkx as nx
@@ -549,17 +550,18 @@ def simulate(sim_inputs, rep_num):
     run_time = run_settings['run_time']
     warmup_time = run_settings['warmup_time']
     global_vars = sim_inputs['global_vars']
-    paths = sim_inputs['paths']
+    output = sim_inputs['output']
     random_number_streams = sim_inputs['random_number_streams']
     locations = sim_inputs['locations']
     routes = sim_inputs['routes']
 
-    Path(paths['stop_logs']).mkdir(parents=True, exist_ok=True)
-    stop_log_path = Path(paths['stop_logs']) / f"unit_stop_log_scenario_{scenario}_rep_{rep_num}.csv"
-    Path(paths['occ_logs']).mkdir(parents=True, exist_ok=True)
-    occ_log_path = Path(paths['occ_logs']) / f"unit_occ_log_scenario_{scenario}_rep_{rep_num}.csv"
-    Path(paths['occ_stats']).mkdir(parents=True, exist_ok=True)
-    occ_stats_path = Path(paths['occ_stats']) / f"unit_occ_stats_scenario_{scenario}_rep_{rep_num}.csv"
+    # Setup output paths
+    stats = output.keys()
+    paths = {stat: None for stat in stats}
+    for stat in stats:
+        if output[stat]['write']:
+            Path(output[stat]['path']).mkdir(parents=True, exist_ok=True)
+            paths[stat] = Path(output[stat]['path']) / f"{stat}_scenario_{scenario}_rep_{rep_num}.csv"
 
     # Initialize a simulation environment
     env = simpy.Environment()
@@ -608,23 +610,40 @@ def simulate(sim_inputs, rep_num):
     print("\nNum patients exiting system: {}".format(obsystem.obunits[Unit.EXIT].num_exits))
     print("Last exit at: {:.2f}\n".format(obsystem.obunits[Unit.EXIT].last_exit))
 
-    # Create output files
-    obio.write_stop_log(stop_log_path, obsystem)
+    # Occupancy stats
+    occ_stats_df, occ_log_df = obstat.compute_occ_stats(obsystem, run_time,
+                                                    warmup=warmup_time, quantiles=[0.05, 0.25, 0.5, 0.75, 0.95, 0.99])
 
-    occ_stats_df = obstat.compute_occ_stats(obsystem, run_time,
-                                     log_path=occ_log_path,
-                                     warmup=warmup_time, quantiles=[0.05, 0.25, 0.5, 0.75, 0.95, 0.99])
+    # Write output files
 
-    occ_stats_df.to_csv(occ_stats_path, index=False)
+    if paths['occ_stats'] is not None:
+        obio.write_occ_stats(paths['occ_stats'], occ_stats_df)
+        print(f"Occupancy stats written to {paths['occ_stats']}")
+
+    if paths['occ_logs'] is not None:
+        obio.write_occ_log(paths['occ_log'], occ_log_df)
+        print(f"Occupancy log written to {paths['occ_log']}")
+
+    if paths['stop_logs'] is not None:
+        obio.write_stop_log(paths['stop_logs'], obsystem)
+        print(f"Stop log written to {paths['stop_logs']}")
+
+    # Stop log processing
+    scenario_rep_summary_dict = obstat.process_stop_log(
+        scenario, rep_num, obsystem, paths['occ_stats'], run_time, warmup_time)
+
+    # if paths['summary_stats'] is not None:
+    #     obio.write_summary_stats(paths['summary_stats'], scenario_rep_summary_dict)
+    #     print(f"Summary stats written to {paths['summary_stats']}")
+
+    # Print occupancy summary to stdout
     header = obio.output_header("Occupancy stats", 50, scenario, rep_num)
     print(header)
     print(occ_stats_df)
 
-    header = obio.output_header("Output logs", 50, scenario, rep_num)
-    print(header)
-    print(f"Stop log written to {stop_log_path}")
-    print(f"Occupancy log written to {occ_log_path}")
-    print(f"Occupancy stats written to {occ_stats_path}")
+    return scenario_rep_summary_dict
+
+
 
 
 def main(argv=None):
@@ -657,8 +676,15 @@ def main(argv=None):
 
     num_replications = config['run_settings']['num_replications']
 
+    results = []
     for i in range(1, num_replications + 1):
-        simulate(config, i)
+        scenario_rep_summary_dict = simulate(config, i)
+        results.append(scenario_rep_summary_dict)
+
+    scenario = config['scenario']
+    scenario_rep_summary_df = pd.DataFrame(results)
+    summary_stat_path = config['output']['summary_stats']['path'] / Path(f'summary_stats_scenario_{scenario}.csv')
+    obio.write_summary_stats(summary_stat_path, scenario_rep_summary_df)
 
     return 0
 
