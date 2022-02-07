@@ -631,6 +631,10 @@ def process_stop_log(scenario_num, rep_num, obsystem,  occ_stats_path, run_time,
 
     return active_units
 
+
+
+
+
 def process_command_line(argv=None):
     """
     Parse command line arguments
