@@ -378,7 +378,7 @@ def conf_intervals(scenario_rep_summary_df):
     return ci_df
 
 
-def create_sim_summaries(output_path, suffix,
+def create_sim_summaries(scenario_rep_simout_path, output_path, suffix,
                          include_inputs=True,
                          scenario_inputs_path=None,
                          active_units=('OBS', 'LDR', 'CSECT', 'PP')
@@ -398,13 +398,12 @@ def create_sim_summaries(output_path, suffix,
     No return value
     """
     # Create output filename stems
-    scenario_rep_simout_stem_ = f'scenario_rep_simout_{suffix}'
+    #scenario_rep_simout_stem_ = f'scenario_rep_simout_{suffix}'
     scenario_simout_stem = f'scenario_simout_{suffix}'
     scenario_siminout_stem = f'scenario_siminout_{suffix}'
     scenario_ci_stem = f'scenario_ci_{suffix}'
 
     # Compute and output summary stats by scenario (aggregating over the replications)
-    scenario_rep_simout_path = output_path / f"{scenario_rep_simout_stem_}.csv"
     scenario_rep_simout_df = pd.read_csv(scenario_rep_simout_path)
     scenario_simout_path = output_path / f"{scenario_simout_stem}.csv"
     scenario_siminout_path = output_path / f"{scenario_siminout_stem}.csv"
@@ -649,6 +648,11 @@ def process_command_line(argv=None):
 
     # Add arguments
     parser.add_argument(
+        "scenario_rep_simout_path", type=str,
+        help="Path and filename containing the scenario rep output summary created by obflow_io.concat_stop_summaries"
+    )
+
+    parser.add_argument(
         "output_path", type=str,
         help="Destination Path for output summary files"
     )
@@ -690,6 +694,7 @@ def process_command_line(argv=None):
 
     return args
 
+
 def main(argv=None):
     """
 
@@ -714,7 +719,9 @@ def main(argv=None):
                            output_file_stem=scenario_rep_summary_stem)
 
     # Create
-    create_sim_summaries(Path(args.output_path), args.suffix,
+    create_sim_summaries(Path(args.scenario_rep_simout_path),
+                         Path(args.output_path),
+                         args.suffix,
                          include_inputs=args.include_inputs,
                          scenario_inputs_path=args.scenario_inputs_path,
                          active_units=active_units)
