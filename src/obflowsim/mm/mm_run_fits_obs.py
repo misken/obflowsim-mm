@@ -1,17 +1,19 @@
+import sys
 from pathlib import Path
 import pickle
 
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from mmfitting import crossval_summarize_mm
+from mm_fitting import crossval_summarize_mm
 
-experiment = "exp11"
+
+experiment = "exp12"
+unit = "obs"
 data_path = Path("data")
 output_path = Path("output")
 figures_path = Path("output", "figures")
-raw_data_path = Path("data", "raw")
-pickle_filename = f"obs_results_{experiment}.pkl"
+pickle_filename = f"{unit}_results_{experiment}.pkl"
 
 # X matrices
 X_obs_noq = pd.read_csv(Path(data_path, f'X_obs_noq_{experiment}.csv'), index_col=0)
@@ -536,12 +538,7 @@ obs_results = {'obs_occ_mean_basicq_lm_results': obs_occ_mean_basicq_lm_results,
                'condmeantime_blockedby_ldr_onlyq_lm_results': condmeantime_blockedby_ldr_onlyq_lm_results,
                }
 
-
-
-
-
-
-
+sys.setrecursionlimit(10000)
 # Pickle the results
 with open(Path(output_path, pickle_filename), 'wb') as pickle_file:
     pickle.dump(obs_results, pickle_file)

@@ -11,3 +11,10 @@ pyyaml~=6.0
 scipy~=1.7.3
 sphinx
 pytest
+
+scikit-learn~=1.0.2
+qng~=0.1.0
+matplotlib~=3.5.0
+yaml~=0.2.5
+obflowsim~=0.1.0
+setuptools~=58.0.4

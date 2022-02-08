@@ -43,6 +43,7 @@ def create_metrics_df(results_dict, output_path):
     consolidated_metrics_df.rename(columns={'index': 'fold'}, inplace=True)
     return consolidated_metrics_df
 
+
 def process_command_line():
     """
     Parse command line arguments
@@ -105,11 +106,11 @@ if __name__ == '__main__':
         figures_path = pfm_args.figures_path
 
     with open(Path(output_path, pkl_to_process), 'rb') as pickle_file:
-        pickeled_results = pickle.load(pickle_file)
-        create_cv_plots(experiment, unit, pickeled_results, Path(figures_path))
-        create_coeff_plots(experiment, unit, pickeled_results, Path(figures_path))
+        results_dict = pickle.load(pickle_file)
+        create_cv_plots(experiment, unit, results_dict, Path(figures_path))
+        create_coeff_plots(experiment, unit, results_dict, Path(figures_path))
 
-        metrics_df = create_metrics_df(pickeled_results, Path("output_path"))
+        metrics_df = create_metrics_df(results_dict, Path("output_path"))
         metrics_df.to_csv(Path(output_path, f"{experiment}_{unit}_metrics_df.csv"), index=False)
 
 

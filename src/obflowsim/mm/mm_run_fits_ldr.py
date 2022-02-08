@@ -1,19 +1,23 @@
+import sys
 from pathlib import Path
+#from joblib import dump, load
 import pickle
 
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from mmfitting import crossval_summarize_mm
+from mm_fitting import crossval_summarize_mm
+from mm_process_fitted_models import create_cv_plots, create_coeff_plots, create_metrics_df
 
 plt.ioff()
 
-experiment = "exp11"
+experiment = "exp12"
+unit = "ldr"
 data_path = Path("data")
 output_path = Path("output")
 figures_path = Path("output", "figures")
-siminout_data_path = Path("data", "siminout")
-pickle_filename = f"ldr_results_{experiment}.pkl"
+pickle_filename = f"{unit}_results_{experiment}.pkl"
+
 
 # X matrices
 X_ldr_noq = pd.read_csv(Path(data_path, f'X_ldr_noq_{experiment}.csv'), index_col=0)
@@ -489,6 +493,15 @@ ldr_results = {'ldr_occ_mean_basicq_lm_results': ldr_occ_mean_basicq_lm_results,
                'condmeantime_blockedby_pp_onlyq_lm_results': condmeantime_blockedby_pp_onlyq_lm_results
                }
 
+
+create_cv_plots(experiment, unit, ldr_results, Path(figures_path))
+create_coeff_plots(experiment, unit, ldr_results, Path(figures_path))
+
+metrics_df = create_metrics_df(ldr_results, Path("output_path"))
+metrics_df.to_csv(Path(output_path, f"{experiment}_{unit}_metrics_df.csv"), index=False)
+
+
+sys.setrecursionlimit(10000)
 # Pickle the results
-with open(Path(output_path, pickle_filename), 'wb') as pickle_file:
-    pickle.dump(ldr_results, pickle_file)
+with open(Path(output_path, pickle_filename), 'wb') as persisted_file:
+    pickle.dump(ldr_results, persisted_file)
