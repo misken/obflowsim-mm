@@ -4,7 +4,7 @@ import math
 
 import pandas as pd
 
-from obnetwork import prob_blockedby_pp_hat, condmeantime_blockedby_pp_hat, obs_blockedby_ldr_hats
+from .obnetwork import prob_blockedby_pp_hat, condmeantime_blockedby_pp_hat, obs_blockedby_ldr_hats
 import qng
 
 
@@ -222,9 +222,11 @@ def qng_approx_from_inputs(scenario_inputs_summary):
         obs_effmean_svctime = obs_mean_svctime + obs_prob_blockedby_ldr * obs_condmeantime_blockedby_ldr
         obs_eff_load = arr_rate * obs_effmean_svctime
         obs_eff_sqrtload = obs_eff_load ** 0.5
+        obs_eff_rho = obs_eff_load / obs_cap
 
         ldr_eff_load = arr_rate * ldr_effmean_svctime
         ldr_eff_sqrtload = ldr_eff_load ** 0.5
+        ldr_eff_rho = ldr_eff_load / ldr_cap
 
         scen_results = {'scenario': scenario,
                         'arr_rate': arr_rate,
@@ -244,8 +246,10 @@ def qng_approx_from_inputs(scenario_inputs_summary):
                         'ldr_cv2_svctime': ldr_cv2_svctime,
                         'pp_cv2_svctime': pp_cv2_svctime,
                         'obs_eff_load': obs_eff_load,
+                        'obs_eff_rho': obs_eff_rho,
                         'obs_eff_sqrtload': obs_eff_sqrtload,
                         'ldr_eff_load': ldr_eff_load,
+                        'ldr_eff_rho': ldr_eff_rho,
                         'ldr_eff_sqrtload': ldr_eff_sqrtload}
 
         results.append(scen_results)

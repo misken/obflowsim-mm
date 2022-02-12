@@ -351,6 +351,13 @@ def condpctiletime_blockedby_pp_hat(prob, arr_rate, pp_mean_svctime, pp_cv2_svct
 
 def _fixedpt_func_mgc_mean_qwait(x, arr_rate, effsvctime, cap, cv2):
     svcrate = 1.0 / (effsvctime - x)
+
+    # Need to worry about rho >= 1
+    # if svcrate <= arr_rate:
+    #     # rho is >=1
+    #     #raise ValueError("Traffic intensity >= 1.0")
+    #     return np.infty
+    # else:
     return qng.mgc_mean_qwait_kimura(arr_rate, svcrate, cap, cv2)
 
 
@@ -373,23 +380,42 @@ def obs_blockedby_ldr_hats(arr_rate, csect_rate, ldr_mean_svctime, ldr_cv2_svcti
     try:
         fixed_point = optimize.fixed_point(_fixedpt_func_mgc_mean_qwait, [0.0], xtol=1e-04,
                                            args=(arr_rate, ldr_effmean_svctime_init, int(ldr_cap), ldr_cv2_svctime))
-    except RuntimeError as e:
+
+        meantime_blockedbyldr_fixedpt = fixed_point[0]  # Since optimize.fixed_point returns an array
+
+        # Now update the estimate of effective svc time in LDR
+        # Oops! Following line double adds the PP part
+        # ldr_effmean_svctime_final = ldr_effmean_svctime_init + (1 - csect_rate) * ldr_meantime_blockedby_pp - meantime_blockedbyldr_fixedpt
+        ldr_effmean_svctime_final = ldr_effmean_svctime_init - meantime_blockedbyldr_fixedpt
+
+        # Finally, compute estimate of prob blocked in obs and conditional meantime blocked
+        prob_blockedby_ldr = qng.mgc_prob_wait_erlangc(arr_rate, 1.0 / ldr_effmean_svctime_final, int(ldr_cap))
+        condmeantime_blockedbyldr = meantime_blockedbyldr_fixedpt / prob_blockedby_ldr
+
+        return (meantime_blockedbyldr_fixedpt, ldr_effmean_svctime_final,
+                prob_blockedby_ldr, condmeantime_blockedbyldr)
+
+    except (RuntimeError, ValueError) as e:
         print(e)
-        print(f'arr_rate={arr_rate}, ldr_effmean_svctime_init={ldr_effmean_svctime_init}, ldr_cap={int(ldr_cap)}, ldr_cv2_svctime={ldr_cv2_svctime}')
+        rho_init = arr_rate * ldr_effmean_svctime_init / ldr_cap
+        print(f'arr_rate={arr_rate}, ldr_effmean_svctime_init={ldr_effmean_svctime_init}, '
+              f'ldr_cap={int(ldr_cap)}, rho_init={rho_init}')
 
-    meantime_blockedbyldr_fixedpt = max(0.0, fixed_point[0])  # Since optimize.fixed_point returns an array
+        meantime_blockedbyldr_init = qng.mgc_mean_qwait_kimura(arr_rate, 1.0 /ldr_effmean_svctime_init, int(ldr_cap), ldr_cv2_svctime)
 
-    # Now update the estimate of effective svc time in LDR
-    # Oops! Following line double adds the PP part
-    # ldr_effmean_svctime_final = ldr_effmean_svctime_init + (1 - csect_rate) * ldr_meantime_blockedby_pp - meantime_blockedbyldr_fixedpt
-    ldr_effmean_svctime_final = ldr_effmean_svctime_init - meantime_blockedbyldr_fixedpt
+        # Now update the estimate of effective svc time in LDR
+        # Oops! Following line double adds the PP part
+        # ldr_effmean_svctime_final = ldr_effmean_svctime_init + (1 - csect_rate) * ldr_meantime_blockedby_pp - meantime_blockedbyldr_fixedpt
 
-    # Finally, compute estimate of prob blocked in obs and conditional meantime blocked
-    prob_blockedby_ldr = qng.mgc_prob_wait_erlangc(arr_rate, 1.0 / ldr_effmean_svctime_final, int(ldr_cap))
-    condmeantime_blockedbyldr = meantime_blockedbyldr_fixedpt / prob_blockedby_ldr
 
-    return (meantime_blockedbyldr_fixedpt, ldr_effmean_svctime_final,
-            prob_blockedby_ldr, condmeantime_blockedbyldr)
+        # Finally, compute estimate of prob blocked in obs and conditional meantime blocked
+        prob_blockedby_ldr = qng.mgc_prob_wait_erlangc(arr_rate, 1.0 / ldr_effmean_svctime_init, int(ldr_cap))
+        condmeantime_blockedbyldr = np.infty
+
+        return (meantime_blockedbyldr_init, ldr_effmean_svctime_init,
+                prob_blockedby_ldr, meantime_blockedbyldr_init / prob_blockedby_ldr)
+
+
 
 
 if __name__ == '__main__':

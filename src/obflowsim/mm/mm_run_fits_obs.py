@@ -6,6 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from mm_fitting import crossval_summarize_mm
+from mm_process_fitted_models import create_cv_plots, create_coeff_plots, create_metrics_df
 
 
 experiment = "exp12"
@@ -537,6 +538,12 @@ obs_results = {'obs_occ_mean_basicq_lm_results': obs_occ_mean_basicq_lm_results,
                'prob_blockedby_ldr_onlyq_lm_results': prob_blockedby_ldr_onlyq_lm_results,
                'condmeantime_blockedby_ldr_onlyq_lm_results': condmeantime_blockedby_ldr_onlyq_lm_results,
                }
+
+create_cv_plots(experiment, unit, obs_results, Path(figures_path))
+create_coeff_plots(experiment, unit, obs_results, Path(figures_path))
+
+metrics_df = create_metrics_df(obs_results, Path("output_path"))
+metrics_df.to_csv(Path(output_path, f"{experiment}_{unit}_metrics_df.csv"), index=False)
 
 sys.setrecursionlimit(10000)
 # Pickle the results

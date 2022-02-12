@@ -6,6 +6,7 @@ import json
 import yaml
 
 from qng import qng
+from mm.mm_dataprep import qng_approx_from_inputs
 
 
 def scenario_grid_to_csv(path_scenario_grid_yaml, _meta_inputs_path):
@@ -30,45 +31,73 @@ def scenario_grid_to_csv(path_scenario_grid_yaml, _meta_inputs_path):
 
     input_scenarios = [scn for scn in itertools.product(*[value for key, value in _scenario_grid.items()])]
     cols = list(_scenario_grid.keys())
-    input_scenarios_df = pd.DataFrame(input_scenarios, columns=cols)
+    scenario_simin_df = pd.DataFrame(input_scenarios, columns=cols)
+
     # Compute capacity using inverse Poisson and accommodation targets
-    input_scenarios_df['cap_obs'] = \
-        input_scenarios_df.apply(lambda x: qng.poissoninv(x.acc_obs, x.arrival_rate * x.mean_los_obs), axis=1)
-    input_scenarios_df['cap_ldr'] = \
-        input_scenarios_df.apply(lambda x: qng.poissoninv(x.acc_ldr, x.arrival_rate * x.mean_los_ldr), axis=1)
-    input_scenarios_df['cap_pp'] = \
-        input_scenarios_df.apply(
+    scenario_simin_df['cap_obs'] = \
+        scenario_simin_df.apply(lambda x: qng.poissoninv(x.acc_obs, x.arrival_rate * x.mean_los_obs), axis=1)
+    scenario_simin_df['cap_ldr'] = \
+        scenario_simin_df.apply(lambda x: qng.poissoninv(x.acc_ldr, x.arrival_rate * x.mean_los_ldr), axis=1)
+    scenario_simin_df['cap_pp'] = \
+        scenario_simin_df.apply(
             lambda x: qng.poissoninv(x.acc_pp,
                                      x.arrival_rate * (x.c_sect_prob * x.mean_los_pp_c + (1 - x.c_sect_prob) * x.mean_los_pp_noc)), axis=1)
 
-    num_scenarios = len(input_scenarios_df.index)
-    input_scenarios_df.set_index(np.arange(1, num_scenarios + 1), inplace=True)
-    input_scenarios_df.index.name = 'scenario'
+    # Compute check values for load and rho based on computed cap levels
+    # These values WILL get recomputed when creating simulation input config files based on
+    # whatever capacity numbers (cap_obs, cap_ldr, cap_pp) are used in the scenarios metainput file.
+
+    scenario_simin_df['check_load_obs'] = \
+        scenario_simin_df.apply(lambda x: x.arrival_rate * x.mean_los_obs, axis=1)
+    scenario_simin_df['check_load_ldr'] = \
+        scenario_simin_df.apply(lambda x: x.arrival_rate * x.mean_los_ldr, axis=1)
+    scenario_simin_df['check_load_pp'] = \
+        scenario_simin_df.apply(
+            lambda x:  x.arrival_rate * (x.c_sect_prob * x.mean_los_pp_c + (1 - x.c_sect_prob) * x.mean_los_pp_noc),
+            axis=1)
+
+    scenario_simin_df['check_rho_obs'] = \
+        scenario_simin_df.apply(lambda x: round(x.check_load_obs / x.cap_obs, 2), axis=1)
+    scenario_simin_df['check_rho_ldr'] = \
+        scenario_simin_df.apply(lambda x: round(x.check_load_ldr / x.cap_ldr, 2), axis=1)
+    scenario_simin_df['check_rho_pp'] = \
+        scenario_simin_df.apply(lambda x: round(x.check_load_pp / x.cap_pp, 2), axis=1)
+
+
+    num_scenarios = len(scenario_simin_df.index)
+    scenario_simin_df['scenario'] = np.arange(1, num_scenarios + 1)
+    #scenario_simin_df.set_index(np.arange(1, num_scenarios + 1), inplace=True)
+    #scenario_simin_df.index.name = 'scenario'
+
+    qng_approx_df = qng_approx_from_inputs(scenario_simin_df)
+    scenario_simin_qng_df = scenario_simin_df.merge(qng_approx_df, on=['scenario'])
+    scenario_simin_qng_df.to_csv(_meta_inputs_path, index=False)
+
 
     # Create meta inputs scenario file to use for simulation runs
-    input_scenarios_df.to_csv(_meta_inputs_path, index=True)
+    # scenario_simin_df.to_csv(_meta_inputs_path, index=True)
     print(f'Metainputs csv file written to {_meta_inputs_path}')
 
 
 # The following inputs need to be in CLI
 
-output_path = Path("mm_use") # Destination for YAML scenarios file
-exp = 'exp12' # Used to create subdirs and filenames
-siminout_path = Path("data/siminout") # Destination for metainputs csv file based on scenarios
+output_path = Path("input") # Destination for YAML scenarios file
+exp = 'exp13' # Used to create subdirs and filenames
+siminout_path = Path("input") # Destination for metainputs csv file based on scenarios
 
 # Need to come up with way to make this dict a file driven thing (e.g. JSON or YAML)
-scenario_grid = {'arrival_rate': np.linspace(0.5, 1.0, num=5), 'mean_los_obs': np.array([1.0, 2.0, 5.0]),
-                 'mean_los_ldr': np.array([12.0, 16.0]), 'mean_los_csect': np.atleast_1d(2.0),
+scenario_grid = {'arrival_rate': np.linspace(0.2, 1.0, num=5), 'mean_los_obs': np.array([1.0, 2.0, 5.0]),
+                 'mean_los_ldr': np.array([12.0]), 'mean_los_csect': np.atleast_1d(2.0),
                  'mean_los_pp_noc': np.array([24.0, 48.0]), 'mean_los_pp_c': np.array([48.0, 72.0]),
                  'c_sect_prob': np.array([0.15, 0.25, 0.35]),
                  'num_erlang_stages_obs': np.atleast_1d(1), 'num_erlang_stages_ldr': np.atleast_1d(2),
                  'num_erlang_stages_csect': np.atleast_1d(1), 'num_erlang_stages_pp': np.atleast_1d(8),
-                 'acc_obs': np.array([0.95, 0.99]), 'acc_ldr': np.array([0.85, 0.95]), 'acc_pp': np.array([0.85, 0.95])}
+                 'acc_obs': np.array([0.95, 0.99]), 'acc_ldr': np.array([0.85, 0.9, 0.99]), 'acc_pp': np.array([0.85, 0.9, 0.99])}
 
 # Make scenario specific subdirectory if it doesn't already exist for writing the meta
 # inputs file to
 Path(siminout_path, exp, ).mkdir(exist_ok=True)
-meta_inputs_path = Path(siminout_path, exp, f'{exp}_obflow06_metainputs.csv')
+meta_inputs_path = Path(siminout_path, exp, f'{exp}_obflowsim_metainputs.csv')
 
 # Create scenario lists from the grid specs above
 scenario_grid_lists = {key: value.tolist() for key, value in scenario_grid.items()}

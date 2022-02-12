@@ -5,6 +5,7 @@ import pickle
 import pandas as pd
 
 from mm_fitting import crossval_summarize_mm
+from mm_process_fitted_models import create_cv_plots, create_coeff_plots, create_metrics_df
 
 
 experiment = "exp12"
@@ -173,6 +174,12 @@ pp_results = {'pp_occ_mean_basicq_lm_results': pp_occ_mean_basicq_lm_results,
               'pp_occ_p95_basicq_hgbr_results': pp_occ_p95_basicq_hgbr_results,
               'pp_occ_p95_onlyq_lm_results': pp_occ_p95_onlyq_lm_results
               }
+
+create_cv_plots(experiment, unit, pp_results, Path(figures_path))
+create_coeff_plots(experiment, unit, pp_results, Path(figures_path))
+
+metrics_df = create_metrics_df(pp_results, Path("output_path"))
+metrics_df.to_csv(Path(output_path, f"{experiment}_{unit}_metrics_df.csv"), index=False)
 
 sys.setrecursionlimit(10000)
 # Pickle the results
