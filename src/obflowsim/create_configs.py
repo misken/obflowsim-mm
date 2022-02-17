@@ -1,23 +1,39 @@
+import sys
+import argparse
 from pathlib import Path
 
 import pandas as pd
-import numpy as np
 import yaml
 
 
-def config_from_csv(exp_suffix_,
-                    scenarios_csv_path_, settings_path_, config_path_,
-                    output_path_, bat_path_, bat_chunk_size_=500):
+def create_configs_from_inputs_csv(exp, scenarios_csv_file_path, simulation_settings_path, config_path,
+                                   run_script_path, update_check_rho=False):
+    """
+    Create one simulation configuration file per scenario.
+    
+    Parameters
+    ----------
+    exp : str, experiment identifier
+    scenarios_csv_file_path : str or Path, simulation scenario input csv file
+    simulation_settings_path : str or Path, YAML file with simulation settings
+    config_path : str or Path, destination for scenario specific config files
+    run_script_path : str or Path, destination for shell scripts for running simulation scenarios
+    update_check_rho : bool (Default=False), if True, recompute rho check values. Set to True if manual capacity levels set.
+
+    Returns
+    -------
+    No return value
+    """
 
     # Read scenarios file in DataFrame
-    scenarios_df = pd.read_csv(scenarios_csv_path_)
+    scenarios_df = pd.read_csv(scenarios_csv_file_path)
     # Read settings file
-    with open(settings_path_, 'rt') as settings_file:
+    with open(simulation_settings_path, 'rt') as settings_file:
         settings = yaml.safe_load(settings_file)
         print(settings)
 
     global_vars = {}
-    with open(bat_path_, 'w') as bat_file:
+    with open(run_script_path, 'w') as bat_file:
         # Iterate over rows in scenarios file
         for row in scenarios_df.iterrows():
             scenario = int(row[1]['scenario'].tolist())
@@ -58,7 +74,7 @@ def config_from_csv(exp_suffix_,
             config['routes'] = settings['routes']
             config['global_vars'] = global_vars
 
-            config_file_path = Path(config_path_) / f'scenario_{scenario}.yaml'
+            config_file_path = Path(config_path) / f'{exp}_scenario_{scenario}.yaml'
 
             with open(config_file_path, 'w', encoding='utf-8') as config_file:
                 yaml.dump(config, config_file)
@@ -75,24 +91,58 @@ def config_from_csv(exp_suffix_,
         # output_proc_line += f"--occ_stats_path {settings['paths']['occ_stats']}"
         # bat_file.write(output_proc_line)
 
+        # Update load and rho check values in case capacity levels were changed manually
+        if update_check_rho:
+            scenarios_df['check_load_obs'] = \
+                scenarios_df.apply(lambda x: x.arrival_rate * x.mean_los_obs, axis=1)
+            scenarios_df['check_load_ldr'] = \
+                scenarios_df.apply(lambda x: x.arrival_rate * x.mean_los_ldr, axis=1)
+            scenarios_df['check_load_pp'] = \
+                scenarios_df.apply(
+                    lambda x: x.arrival_rate * (x.c_sect_prob * x.mean_los_pp_c + (1 - x.c_sect_prob) * x.mean_los_pp_noc),
+                    axis=1)
 
-def create_bat_chunks(bat_path_, bat_chunk_size_):
+            scenarios_df['check_rho_obs'] = \
+                scenarios_df.apply(lambda x: round(x.check_load_obs / x.cap_obs, 2), axis=1)
+            scenarios_df['check_rho_ldr'] = \
+                scenarios_df.apply(lambda x: round(x.check_load_ldr / x.cap_ldr, 2), axis=1)
+            scenarios_df['check_rho_pp'] = \
+                scenarios_df.apply(lambda x: round(x.check_load_pp / x.cap_pp, 2), axis=1)
 
-    base_bat_path = Path(bat_path_).parent
-    stem = Path(bat_path_).stem
+            # Rewrite scenarios input file with updated rho_checks
+            scenarios_df.to_csv(scenarios_csv_file_path, index=False)
 
-    with open(bat_path_, 'r') as batf:
+
+def create_run_script_chunks(run_script_path, run_script_chunk_size):
+    """
+    Split shell script of simulation run commands into multiple files each
+    (except for perhaps the last one) haveing ``bat_scenario_chunk_size`` lines.
+
+    Parameters
+    ----------
+    run_script_path : str or Path
+    run_script_chunk_size : int
+
+    Returns
+    -------
+    No return value - creates multiple output files of simulation run commands.
+    """
+
+    base_bat_path = Path(run_script_path).parent
+    stem = Path(run_script_path).stem
+
+    with open(run_script_path, 'r') as batf:
         bat_lines = batf.readlines()
 
     num_lines = len(bat_lines)
-    num_full_chunks = num_lines // bat_chunk_size_
+    num_full_chunks = num_lines // run_script_chunk_size
 
     for i in range(num_full_chunks):
-        start = i  * bat_chunk_size_
-        end = start + bat_chunk_size_
+        start = i * run_script_chunk_size
+        end = start + run_script_chunk_size
         chunk = bat_lines[slice(start, end)]
 
-        chunk_bat_file = Path(base_bat_path, f'{stem}_{start + 1}_{end + 1}.sh')
+        chunk_bat_file = Path(base_bat_path, f'{stem}_{start + 1}_{end}.sh')
         with open(chunk_bat_file, 'w') as chunkf:
             for line in chunk:
                 chunkf.write(f'{line}')
@@ -102,26 +152,76 @@ def create_bat_chunks(bat_path_, bat_chunk_size_):
     if end < num_lines - 1:
         start = end
         end = num_lines
-        chunk_bat_file = Path(base_bat_path, f'{stem}_{start + 1}_{end + 1}.sh')
+        chunk_bat_file = Path(base_bat_path, f'{stem}_{start + 1}_{end}.sh')
         chunk = bat_lines[start:]
         with open(chunk_bat_file, 'w') as chunkf:
             for line in chunk:
                 chunkf.write(f'{line}')
 
 
+def process_command_line(argv=None):
+    """
+    Parse command line arguments
+
+    `argv` is a list of arguments, or `None` for ``sys.argv[1:]``.
+    Return a Namespace representing the argument list.
+    """
+
+    # Create the parser
+    parser = argparse.ArgumentParser(prog='scenario_tools',
+                                     description='Create scenario related files for obflowsim')
+
+    # Add arguments
+    parser.add_argument(
+        "exp", type=str,
+        help="Experiment identifier. Used in filenames."
+    )
+
+    parser.add_argument(
+        'scenario_inputs_file_path', type=str,
+        help="Scenario inputs csv file"
+    )
+
+    parser.add_argument(
+        'sim_settings_file_path', type=str,
+        help="Simulation experiment settings YAML file"
+    )
+
+    parser.add_argument(
+        'configs_path', type=str,
+        help="Destination directory for the scenario config files"
+    )
+
+    parser.add_argument(
+        'run_script_path', type=str,
+        help="Destination directory for the scripts for running the simulations."
+    )
+
+    parser.add_argument(
+        'run_script_chunk_size', type=int,
+        help="Number of run simulation commands in each script file."
+    )
+
+    parser.add_argument('--update_rho_checks', '-u', dest='update_rho', action='store_true')
+
+    # do the parsing
+    args = parser.parse_args(argv)
+
+    return args
+
+
+def main(argv=None):
+    # Parse command line arguments
+    args = process_command_line(argv)
+
+    create_configs_from_inputs_csv(args.exp, args.scenario_inputs_file_path,
+                                   args.sim_settings_file_path,
+                                   args.config_path,
+                                   args.run_script_path, args.update_rho)
+
+    create_run_script_chunks(args.run_script_path, args.run_script_chunk_size)
+
+
 if __name__ == '__main__':
+    sys.exit(main())
 
-    exp_suffix = 'exp13'
-    scenarios_csv_path = Path(f'input/{exp_suffix}/{exp_suffix}_obflowsim_metainputs.csv')
-    settings_path = Path(f'input/{exp_suffix}/{exp_suffix}_obflowsim_settings.yaml')
-    config_path = Path(f'input/{exp_suffix}/config/')
-    bat_path = Path('./run') / f'{exp_suffix}_obflowsim_run.sh'
-    output_path = Path('./output') / f'{exp_suffix}/'
-
-
-    config_from_csv(exp_suffix,
-                    scenarios_csv_path, settings_path, config_path,
-                    output_path, bat_path)
-
-    bat_chunk_size = 500
-    create_bat_chunks(bat_path, bat_chunk_size)

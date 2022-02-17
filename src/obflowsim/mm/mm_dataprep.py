@@ -229,7 +229,6 @@ def qng_approx_from_inputs(scenario_inputs_summary):
         ldr_eff_rho = ldr_eff_load / ldr_cap
 
         scen_results = {'scenario': scenario,
-                        'arr_rate': arr_rate,
                         'mean_los_pp': pp_mean_svctime,
                         'load_obs': load_obs,
                         'load_ldr': load_ldr,

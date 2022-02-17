@@ -210,7 +210,7 @@ if __name__ == '__main__':
     if override_args:
         mm_experiment_suffix = "exp11"
         perf_curve_scenarios_suffix = "exp11e"
-        # Path to scenario yaml file created by scenario_grid.py
+        # Path to scenario yaml file created by scenario_tools.py
         path_scenario_grid_yaml = Path("mm_use", f"scenario_grid_{perf_curve_scenarios_suffix}.yaml")
         path_scenario_csv = Path("mm_use", f"X_performance_curves_{perf_curve_scenarios_suffix}.csv")
         siminout_path = Path("data/siminout")
