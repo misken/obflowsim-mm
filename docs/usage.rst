@@ -83,14 +83,35 @@ each simulation scenario.
 Generate simulation config file for each scenario
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The ``create_configs.py`` module needs a CLI.
+The ``create_configs.py`` module does two main things:
+
+* create a config file for each simulation scenario
+* generate shell scripts for running the simulation scenarios
 
 .. code::
 
-    python create_configs.py output/exp13/summary_stats/ output/exp13/ summary_stats_scenario exp13_scenario_rep_simout
-    
+    create_configs [-h] [--update_rho_checks]
+                          exp scenario_inputs_file_path sim_settings_file_path
+                          configs_path run_script_path run_script_chunk_size
+
+For example,
+
+.. code::
+
+    create_configs exp14 \
+        input/exp14/exp14_obflowsim_scenario_inputs.csv \
+        input/exp14/exp14_obflowsim_settings.yaml \
+        input/exp14/config run/exp14 500
+                      
 Generate shell scripts to run the simulation scenarios
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+As mentioned in the previous step ``create_configs.py`` creates the
+shell scripts containing the commands to run the simulation scenarios. 
+In order to take advantage of multiple CPUs, we can specify a 
+``run_script_chunk_size`` parameter to break up the runs into multiple
+scripts - each of which can be launched separately. It's a crude form
+of parallel processing.
 
 Run the shell scripts to run the simulation scenarios
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

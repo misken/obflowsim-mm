@@ -33,7 +33,8 @@ def create_configs_from_inputs_csv(exp, scenarios_csv_file_path, simulation_sett
         print(settings)
 
     global_vars = {}
-    with open(run_script_path, 'w') as bat_file:
+    run_script_file_path = Path(run_script_path, f'{exp}_run.sh')
+    with open(run_script_file_path, 'w') as bat_file:
         # Iterate over rows in scenarios file
         for row in scenarios_df.iterrows():
             scenario = int(row[1]['scenario'].tolist())
@@ -99,7 +100,8 @@ def create_configs_from_inputs_csv(exp, scenarios_csv_file_path, simulation_sett
                 scenarios_df.apply(lambda x: x.arrival_rate * x.mean_los_ldr, axis=1)
             scenarios_df['check_load_pp'] = \
                 scenarios_df.apply(
-                    lambda x: x.arrival_rate * (x.c_sect_prob * x.mean_los_pp_c + (1 - x.c_sect_prob) * x.mean_los_pp_noc),
+                    lambda x: x.arrival_rate * (
+                                x.c_sect_prob * x.mean_los_pp_c + (1 - x.c_sect_prob) * x.mean_los_pp_noc),
                     axis=1)
 
             scenarios_df['check_rho_obs'] = \
@@ -112,15 +114,17 @@ def create_configs_from_inputs_csv(exp, scenarios_csv_file_path, simulation_sett
             # Rewrite scenarios input file with updated rho_checks
             scenarios_df.to_csv(scenarios_csv_file_path, index=False)
 
+    return run_script_file_path
 
-def create_run_script_chunks(run_script_path, run_script_chunk_size):
+
+def create_run_script_chunks(run_script_file_path, run_script_chunk_size):
     """
     Split shell script of simulation run commands into multiple files each
     (except for perhaps the last one) haveing ``bat_scenario_chunk_size`` lines.
 
     Parameters
     ----------
-    run_script_path : str or Path
+    run_script_file_path : str or Path
     run_script_chunk_size : int
 
     Returns
@@ -128,35 +132,44 @@ def create_run_script_chunks(run_script_path, run_script_chunk_size):
     No return value - creates multiple output files of simulation run commands.
     """
 
-    base_bat_path = Path(run_script_path).parent
-    stem = Path(run_script_path).stem
+    base_script_path = Path(run_script_file_path).parent
+    stem = Path(run_script_file_path).stem
 
-    with open(run_script_path, 'r') as batf:
+    with open(run_script_file_path, 'r') as batf:
         bat_lines = batf.readlines()
 
     num_lines = len(bat_lines)
     num_full_chunks = num_lines // run_script_chunk_size
 
-    for i in range(num_full_chunks):
-        start = i * run_script_chunk_size
-        end = start + run_script_chunk_size
-        chunk = bat_lines[slice(start, end)]
-
-        chunk_bat_file = Path(base_bat_path, f'{stem}_{start + 1}_{end}.sh')
-        with open(chunk_bat_file, 'w') as chunkf:
-            for line in chunk:
-                chunkf.write(f'{line}')
-
-    # Write out any remaining partial chunks
-
-    if end < num_lines - 1:
-        start = end
+    if num_full_chunks == 0:
+        start = 0
         end = num_lines
-        chunk_bat_file = Path(base_bat_path, f'{stem}_{start + 1}_{end}.sh')
-        chunk = bat_lines[start:]
+        chunk = bat_lines[slice(start, end)]
+        chunk_bat_file = Path(base_script_path, f'{stem}_{start + 1}_{end}.sh')
         with open(chunk_bat_file, 'w') as chunkf:
             for line in chunk:
                 chunkf.write(f'{line}')
+    else:
+        for i in range(num_full_chunks):
+            start = i * run_script_chunk_size
+            end = start + run_script_chunk_size
+            chunk = bat_lines[slice(start, end)]
+
+            chunk_bat_file = Path(base_script_path, f'{stem}_{start + 1}_{end}.sh')
+            with open(chunk_bat_file, 'w') as chunkf:
+                for line in chunk:
+                    chunkf.write(f'{line}')
+
+        # Write out any remaining partial chunks
+
+        if end < num_lines - 1:
+            start = end
+            end = num_lines
+            chunk_bat_file = Path(base_script_path, f'{stem}_{start + 1}_{end}.sh')
+            chunk = bat_lines[start:]
+            with open(chunk_bat_file, 'w') as chunkf:
+                for line in chunk:
+                    chunkf.write(f'{line}')
 
 
 def process_command_line(argv=None):
@@ -168,7 +181,7 @@ def process_command_line(argv=None):
     """
 
     # Create the parser
-    parser = argparse.ArgumentParser(prog='scenario_tools',
+    parser = argparse.ArgumentParser(prog='create_configs',
                                      description='Create scenario related files for obflowsim')
 
     # Add arguments
@@ -214,14 +227,13 @@ def main(argv=None):
     # Parse command line arguments
     args = process_command_line(argv)
 
-    create_configs_from_inputs_csv(args.exp, args.scenario_inputs_file_path,
-                                   args.sim_settings_file_path,
-                                   args.config_path,
-                                   args.run_script_path, args.update_rho)
+    run_script_file_path = create_configs_from_inputs_csv(args.exp, args.scenario_inputs_file_path,
+                                                          args.sim_settings_file_path,
+                                                          args.configs_path,
+                                                          args.run_script_path, args.update_rho)
 
-    create_run_script_chunks(args.run_script_path, args.run_script_chunk_size)
+    create_run_script_chunks(run_script_file_path, args.run_script_chunk_size)
 
 
 if __name__ == '__main__':
     sys.exit(main())
-
