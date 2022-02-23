@@ -98,7 +98,7 @@ For example,
 
 .. code::
 
-    create_configs exp14 \
+    python create_configs.py exp14 \
         input/exp14/exp14_obflowsim_scenario_inputs.csv \
         input/exp14/exp14_obflowsim_settings.yaml \
         input/exp14/config run/exp14 500
@@ -116,26 +116,48 @@ of parallel processing.
 Run the shell scripts to run the simulation scenarios
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. code::
+
+    sh ./run/exp14_run.sh
+
  
 Run obflow_io.py to concatenate the scenario rep files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This will create the main output summary file with one row per (scenario, rep) pair.
+
+.. code::
+
+    obflow_io stop_summaries_path output_path summary_stats_file_stem \
+                     output_file_stem
+
     
 .. code::
 
-    python obflow_io.py output/exp13/summary_stats/ output/exp13/ summary_stats_scenario exp13_scenario_rep_simout
+    python obflow_io.py output/exp14/summary_stats/ output/exp14/ summary_stats_scenario exp14_scenario_rep_simout
+
 
 Run obflow_stat.py to create the simulation summary files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+At this point we have statistics for each (scenario, rep) pair and need to aggregate
+over the replications to get stats by scenario.
+
+.. code::
+    obflow_stat [-h] [--process_logs] [--stop_log_path STOP_LOG_PATH]
+                   [--occ_stats_path OCC_STATS_PATH] [--run_time RUN_TIME]
+                   [--warmup_time WARMUP_TIME] [--include_inputs]
+                   [--scenario_inputs_path SCENARIO_INPUTS_PATH]
+                   scenario_rep_simout_path output_path suffix
+
 .. code::
 
-    python obflow_stat.py output/exp13/exp13_scenario_rep_simout.csv output/exp13 exp13 --include_inputs --scenario_inputs_path input/exp13/exp13_obflowsim_metainputs.csv
+    python obflow_stat.py output/exp14/exp14_scenario_rep_simout.csv output/exp14 exp14 --include_inputs --scenario_inputs_path input/exp14/exp14_obflowsim_scenario_inputs.csv
 
 Aggregates by scenario (over the replications).
-Merges scenario inputs with scenario simulation summary stats.
-Computes queueing approximations to include with with input output summary.
+Merges scenario inputs (which include the queueing approximations) with scenario simulation summary stats.
 
 The input output summary file is ready to use in metamodeling experiments
 
-Fitting and evaluation simulation metamodels
+Fitting and evaluation of simulation metamodels
 -------------------------------------------------------------

@@ -5,15 +5,15 @@ import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from mm_fitting import crossval_summarize_mm
-from mm_process_fitted_models import create_cv_plots, create_coeff_plots, create_metrics_df
+from obflowsim.mm.mm_fitting import crossval_summarize_mm
+from obflowsim.mm.mm_process_fitted_models import create_cv_plots, create_coeff_plots, create_metrics_df
 
 
-experiment = "exp12"
+experiment = "exp13"
 unit = "obs"
-data_path = Path("data")
-output_path = Path("output")
-figures_path = Path("output", "figures")
+data_path = Path("data/exp13")
+output_path = Path("output/exp13")
+figures_path = Path("output/exp13", "figures")
 pickle_filename = f"{unit}_results_{experiment}.pkl"
 
 # X matrices

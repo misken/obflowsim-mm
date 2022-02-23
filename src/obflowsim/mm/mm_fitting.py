@@ -26,10 +26,10 @@ from sklearn.ensemble import HistGradientBoostingRegressor
 
 
 from qng import qng
-from obnetwork import ErlangcEstimator, LoadEstimator, SqrtLoadEstimator, CondMeanWaitLDREstimator
+from obflowsim.mm.obnetwork import ErlangcEstimator, LoadEstimator, SqrtLoadEstimator, CondMeanWaitLDREstimator
 
 
-def crossval_summarize_mm(scenario, unit, measure, X, y, flavor='lm',
+def crossval_summarize_mm(unit_pm_qdata_model, unit, measure, X, y, flavor='lm',
                           scoring=('neg_mean_absolute_error', 'neg_mean_absolute_percentage_error', 'r2'),
                           scale=False, fit_intercept=True, n_splits=5, kfold_shuffle=True, kfold_random_state=4,
                           return_train_score=True, return_estimator=True,
@@ -45,7 +45,7 @@ def crossval_summarize_mm(scenario, unit, measure, X, y, flavor='lm',
     load_pctile
     measure
     unit
-    scenario
+    unit_pm_qdata_model
     X
     y
     flavor
@@ -176,7 +176,7 @@ def crossval_summarize_mm(scenario, unit, measure, X, y, flavor='lm',
     residuals = predictions - y
 
     # Create scatter of actual vs predicted
-    fig_scatter = prediction_scatter(y, predictions, f"{scenario} - cross_val_predict")
+    fig_scatter = prediction_scatter(y, predictions, f"{unit_pm_qdata_model} - cross_val_predict")
 
     # Create flavor specific results dictionaries (e.g. rf doesn't have coeffs)
     if flavor in flavors_w_coeffs:
@@ -222,7 +222,7 @@ def crossval_summarize_mm(scenario, unit, measure, X, y, flavor='lm',
         # Create coefficient plot
         fig_coeffs = coeffs_by_fold(unscaled_coeffs_df, col_wrap=5, sharey=False)
 
-        results = {'scenario': scenario,
+        results = {'unit_pm_qdata_model': unit_pm_qdata_model,
                    'measure': measure,
                    'flavor': flavor,
                    'unit': unit,
@@ -238,7 +238,7 @@ def crossval_summarize_mm(scenario, unit, measure, X, y, flavor='lm',
                    'fitplot': fig_scatter,
                    'coefplot': fig_coeffs}
     else:
-        results = {'scenario': scenario,
+        results = {'unit_pm_qdata_model': unit_pm_qdata_model,
                    'measure': measure,
                    'flavor': flavor,
                    'unit': unit,
@@ -252,7 +252,7 @@ def crossval_summarize_mm(scenario, unit, measure, X, y, flavor='lm',
     return results
 
 
-def fit_predict_mm(scenario, unit, measure, X_train, y_train, X_test, y_test, flavor='lm',
+def fit_predict_mm(unit_pm_qdata_model, unit, measure, X_train, y_train, X_test, y_test, flavor='lm',
                    scale=False, fit_intercept=True, n_splits=5,
                    lassocv_shuffle=True, lassocv_random_state=4,
                    lasso_alpha=1.0, lasso_max_iter=1000, nn_max_iter=3000,
@@ -327,7 +327,7 @@ def fit_predict_mm(scenario, unit, measure, X_train, y_train, X_test, y_test, fl
 
     min_pred = np.min(predictions_test)
 
-    fig_scatter = prediction_scatter(y_test, predictions_test, f"{scenario} - Actual vs Prediction (test)", min_pred)
+    fig_scatter = prediction_scatter(y_test, predictions_test, f"{unit_pm_qdata_model} - Actual vs Prediction (test)", min_pred)
 
     # Create flavor specific results dictionaries (e.g. rf doesn't have coeffs)
     if flavor in flavors_w_coeffs:
@@ -350,7 +350,7 @@ def fit_predict_mm(scenario, unit, measure, X_train, y_train, X_test, y_test, fl
         # Create coefficient plot
         fig_coeffs = coeffs_by_fold(coeffs_df, col_wrap=5, sharey=False)
 
-        results = {'scenario': scenario,
+        results = {'scenario': unit_pm_qdata_model,
                    'measure': measure,
                    'flavor': flavor,
                    'model': model,
@@ -362,7 +362,7 @@ def fit_predict_mm(scenario, unit, measure, X_train, y_train, X_test, y_test, fl
                    'fitplot': fig_scatter,
                    'coefplot': fig_coeffs}
     else:
-        results = {'scenario': scenario,
+        results = {'scenario': unit_pm_qdata_model,
                    'measure': measure,
                    'flavor': flavor,
                    'unit': unit,

@@ -4,7 +4,7 @@ import math
 
 import pandas as pd
 
-from .obnetwork import prob_blockedby_pp_hat, condmeantime_blockedby_pp_hat, obs_blockedby_ldr_hats
+from obflowsim.mm.obnetwork import prob_blockedby_pp_hat, condmeantime_blockedby_pp_hat, obs_blockedby_ldr_hats
 import qng
 
 
@@ -311,11 +311,11 @@ if __name__ == '__main__':
     override_args = True
 
     if override_args:
-        exp = "exp12"
-        siminout_path = Path("data", "siminout", f"scenario_siminout_{exp}.csv")
-        siminout_qng_path = Path("data", "siminout", f"scenario_siminout_qng_{exp}.csv")
-        output_data_path = Path("data")
-        scenarios = slice(1, 2880)
+        exp = "exp13"
+        #siminout_path = Path("input", "exp13", f"scenario_siminout_{exp}.csv")
+        siminout_qng_path = Path("../output", "exp13", f"scenario_siminout_{exp}.csv")
+        output_data_path = Path("data/exp13")
+        scenarios = slice(1, 3240)
     else:
         mm_args = process_command_line()
         exp = mm_args.experiment
@@ -327,5 +327,6 @@ if __name__ == '__main__':
             scenarios = None
         output_data_path = mm_args.output_data_path
 
-    create_siminout_qng(siminout_path, siminout_qng_path)
+    # Now scenario_tools.scenario_grid_to_csv adds the qng approximations to the input file
+    #create_siminout_qng(siminout_path, siminout_qng_path)
     create_x_y(exp, siminout_qng_path, scenarios, output_data_path)

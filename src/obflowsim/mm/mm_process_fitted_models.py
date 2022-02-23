@@ -30,10 +30,10 @@ def create_metrics_df(results_dict, output_path):
     dfs = []
     for key in results_dict.keys():
         print(f"metrics df: {key}")
-        scenario = results_dict[key]['scenario']
+        unit_pm_qdata_model = results_dict[key]['unit_pm_qdata_model']
 
         metrics_df = results_dict[key]['metrics_df']
-        metrics_df['scenario'] = scenario
+        metrics_df['unit_pm_qdata_model'] = unit_pm_qdata_model
         metrics_df['flavor'] = results_dict[key]['flavor']
         metrics_df['unit'] = results_dict[key]['unit']
         dfs.append(metrics_df)
