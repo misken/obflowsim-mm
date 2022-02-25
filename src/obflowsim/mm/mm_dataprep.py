@@ -38,7 +38,7 @@ def create_x_y(exp, sim_input_output_qnq_path, scenarios, output_path):
     X_pp_noq_cols = ['arrival_rate', 'mean_los_pp',
                      'c_sect_prob', 'cap_pp']
 
-    X_ldr_noq_cols = ['arrival_rate', 'mean_los_obs', 'mean_los_ldr', 'cap_ldr',
+    X_ldr_noq_cols = ['arrival_rate', 'mean_los_obs', 'cap_obs', 'mean_los_ldr', 'cap_ldr',
                       'mean_los_pp', 'c_sect_prob', 'cap_pp']
 
     X_obs_noq_cols = ['arrival_rate', 'mean_los_obs', 'cap_obs', 'mean_los_ldr', 'cap_ldr',
@@ -49,7 +49,8 @@ def create_x_y(exp, sim_input_output_qnq_path, scenarios, output_path):
     X_pp_basicq_cols.extend(['load_pp', 'rho_pp'])
 
     X_ldr_basicq_cols = X_ldr_noq_cols.copy()
-    X_ldr_basicq_cols.extend(['load_ldr', 'rho_ldr', 'load_pp', 'rho_pp'])
+    X_ldr_basicq_cols.extend(['load_obs', 'rho_obs', 'load_ldr',
+                              'rho_ldr', 'load_pp', 'rho_pp'])
 
     X_obs_basicq_cols = X_obs_noq_cols.copy()
     X_obs_basicq_cols.extend(['load_obs', 'rho_obs', 'load_ldr',
@@ -81,7 +82,7 @@ def create_x_y(exp, sim_input_output_qnq_path, scenarios, output_path):
     X_obs_condmeantimeblockedbyldr_onlyq_cols = ['condmeantime_blockedby_ldr_approx']
 
 
-    # OBS modeled as infinite capacity system but time in system impacted by
+    # OBS time in system impacted by
     # congestion in the downstream units.
     X_obs_q_cols = X_obs_basicq_cols.copy()
     X_obs_q_cols.extend(['prob_blockedby_pp_approx', 'condmeantime_blockedby_pp_approx',
@@ -104,10 +105,12 @@ def create_x_y(exp, sim_input_output_qnq_path, scenarios, output_path):
 
     # LDR
     X_ldr_basicq = xy_df.loc[scenarios, X_ldr_basicq_cols]
+    X_ldr_basicq['sqrt_load_obs'] = X_ldr_basicq['load_obs'] ** 0.5
     X_ldr_basicq['sqrt_load_ldr'] = X_ldr_basicq['load_ldr'] ** 0.5
     X_ldr_basicq['sqrt_load_pp'] = X_ldr_basicq['load_pp'] ** 0.5
 
     X_ldr_q = xy_df.loc[scenarios, X_ldr_q_cols]
+    X_ldr_q['sqrt_load_obs'] = X_ldr_q['load_obs'] ** 0.5
     X_ldr_q['sqrt_load_ldr'] = X_ldr_q['load_ldr'] ** 0.5
     X_ldr_q['sqrt_load_pp'] = X_ldr_q['load_pp'] ** 0.5
 
@@ -312,11 +315,11 @@ if __name__ == '__main__':
     override_args = True
 
     if override_args:
-        exp = "exp12"
+        exp = "exp13"
         #siminout_path = Path("input", "exp13", f"scenario_siminout_{exp}.csv")
         siminout_qng_path = Path("../output", exp, f"scenario_siminout_{exp}.csv")
         output_data_path = Path(f"input/{exp}")
-        scenarios = slice(1, 2880)
+        scenarios = slice(1, 3240)
     else:
         mm_args = process_command_line()
         exp = mm_args.experiment

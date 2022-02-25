@@ -161,3 +161,19 @@ The input output summary file is ready to use in metamodeling experiments
 
 Fitting and evaluation of simulation metamodels
 -------------------------------------------------------------
+
+The main steps in fitting metamodels are:
+
+* Generate the X and y matrix data files from the simulation input output summary file. (mm_dataprep.py)
+* Run the metamodel fits for OBS, LDR and PP (mm_run_fits_{unit}.py)
+    - still need to add a CLI to these
+    - output includes metrics summary csv, actual vs predicted plots and coefficient plots
+* Further output analysis (ongoing work)
+
+Generating and evaluation of performance curves
+-----------------------------------------------
+
+Now that we have some good performing metamodels, we can use them to do things like generate
+performance curves. The main steps are:
+
+* Generation and evaluation of performance curves (ongoing work)
