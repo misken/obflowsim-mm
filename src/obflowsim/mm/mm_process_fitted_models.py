@@ -10,23 +10,23 @@ def create_cv_plots(experiment, unit, results_dict, figures_path):
 
     for key in results_dict.keys():
         print(f"cv plot: {key}")
-        scenario = results_dict[key]['scenario']
+        unit_pm_qdata_model = results_dict[key]['unit_pm_qdata_model']
         scatter_plot = results_dict[key]['fitplot']
-        plot_name = f"{experiment}_{unit}_{scenario}_cv_scatter.png"
+        plot_name = f"{experiment}_{unit}_{unit_pm_qdata_model}_cv_scatter.png"
         scatter_plot.savefig(Path(figures_path, plot_name))
 
 
 def create_coeff_plots(experiment, unit, results_dict, figures_path):
     for key in results_dict.keys():
-        scenario = results_dict[key]['scenario']
+        unit_pm_qdata_model = results_dict[key]['unit_pm_qdata_model']
         if 'coefplot' in results_dict[key].keys():
             print(f"coeff plot: {key}")
             scatter_plot = results_dict[key]['coefplot']
-            plot_name = f"{experiment}_{unit}_{scenario}_cv_coeff.png"
+            plot_name = f"{experiment}_{unit}_{unit_pm_qdata_model}_cv_coeff.png"
             scatter_plot.savefig(Path(figures_path, plot_name))
 
 
-def create_metrics_df(results_dict, output_path):
+def create_metrics_df(results_dict):
     dfs = []
     for key in results_dict.keys():
         print(f"metrics df: {key}")
@@ -34,8 +34,11 @@ def create_metrics_df(results_dict, output_path):
 
         metrics_df = results_dict[key]['metrics_df']
         metrics_df['unit_pm_qdata_model'] = unit_pm_qdata_model
-        metrics_df['flavor'] = results_dict[key]['flavor']
         metrics_df['unit'] = results_dict[key]['unit']
+        metrics_df['measure'] = results_dict[key]['measure']
+        metrics_df['qdata'] = results_dict[key]['qdata']
+        metrics_df['model'] = results_dict[key]['flavor']
+
         dfs.append(metrics_df)
 
     consolidated_metrics_df = pd.concat(dfs)
@@ -92,26 +95,29 @@ if __name__ == '__main__':
     override_args = True
 
     if override_args:
-        experiment = "exp11"
-        unit = "ldr"
-        pkl_to_process = f"{unit}_results_exp11.pkl"
-        output_path = "output"
-        figures_path = f"output/figures/{experiment}"
+        experiment = "exp13"
+        unit = "pp"
+        output_path = f"output/{experiment}"
+        pickle_path_filename = Path(output_path, f"{experiment}_{unit}_results.pkl")
+
+        figures_path = f"output/{experiment}/figures"
     else:
         pfm_args = process_command_line()
         experiment = pfm_args.experiment
         unit = pfm_args.unit
-        pkl_to_process = pfm_args.pkl_to_process
         output_path = pfm_args.output_path
+        pkl_to_process = pfm_args.pkl_to_process
+        pickle_path_filename = Path(output_path, pkl_to_process)
+
         figures_path = pfm_args.figures_path
 
-    with open(Path(output_path, pkl_to_process), 'rb') as pickle_file:
+    with open(pickle_path_filename, 'rb') as pickle_file:
         results_dict = pickle.load(pickle_file)
         create_cv_plots(experiment, unit, results_dict, Path(figures_path))
         create_coeff_plots(experiment, unit, results_dict, Path(figures_path))
 
-        metrics_df = create_metrics_df(results_dict, Path("output_path"))
-        metrics_df.to_csv(Path(output_path, f"{experiment}_{unit}_metrics_df.csv"), index=False)
+        metrics_df = create_metrics_df(results_dict)
+        metrics_df.to_csv(Path(output_path, f"{experiment}_{unit}_metrics.csv"), index=False)
 
 
 

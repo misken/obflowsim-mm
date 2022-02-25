@@ -10,497 +10,500 @@ from obflowsim.mm.mm_process_fitted_models import create_cv_plots, create_coeff_
 
 plt.ioff()
 
-experiment = "exp13"
 unit = "ldr"
-data_path = Path("data/exp13")
-output_path = Path("output/exp13")
-figures_path = Path("output/exp13", "figures")
-pickle_filename = f"{unit}_results_{experiment}.pkl"
+experiment = "exp11"
+input_path = Path(f"input/{experiment}")
+output_path = Path(f"output/{experiment}")
+figures_path = Path(f"output/{experiment}", "figures")
+
+
+metrics_path_filename = Path(output_path, f"{experiment}_{unit}_metrics.csv")
+pickle_path_filename = Path(output_path, f"{experiment}_{unit}_results.pkl")
 
 
 # X matrices
-X_ldr_noq = pd.read_csv(Path(data_path, f'X_ldr_noq_{experiment}.csv'), index_col=0)
-X_ldr_basicq = pd.read_csv(Path(data_path, f'X_ldr_basicq_{experiment}.csv'), index_col=0)
-X_ldr_q = pd.read_csv(Path(data_path, f'X_ldr_q_{experiment}.csv'), index_col=0)
+X_ldr_noq = pd.read_csv(Path(input_path, f'X_ldr_noq_{experiment}.csv'), index_col=0)
+X_ldr_basicq = pd.read_csv(Path(input_path, f'X_ldr_basicq_{experiment}.csv'), index_col=0)
+X_ldr_q = pd.read_csv(Path(input_path, f'X_ldr_q_{experiment}.csv'), index_col=0)
 
-X_ldr_occ_mean_onlyq = pd.read_csv(Path(data_path, f'X_ldr_occmean_onlyq_{experiment}.csv'), index_col=0)
-X_ldr_occ_p95_onlyq = pd.read_csv(Path(data_path, f'X_ldr_occp95_onlyq_{experiment}.csv'), index_col=0)
-X_ldr_prob_blockedby_pp_onlyq = pd.read_csv(Path(data_path, f'X_ldr_prob_blockedby_pp_onlyq_{experiment}.csv'),
+X_ldr_occmean_onlyq = pd.read_csv(Path(input_path, f'X_ldr_occmean_onlyq_{experiment}.csv'), index_col=0)
+X_ldr_occp95_onlyq = pd.read_csv(Path(input_path, f'X_ldr_occp95_onlyq_{experiment}.csv'), index_col=0)
+X_ldr_probblockedbypp_onlyq = pd.read_csv(Path(input_path, f'X_ldr_probblockedbypp_onlyq_{experiment}.csv'),
                                             index_col=0)
-X_ldr_condmeantime_blockedby_pp_onlyq = \
-    pd.read_csv(Path(data_path, f'X_ldr_condmeantime_blockedby_pp_onlyq_{experiment}.csv'), index_col=0)
+X_ldr_condmeantimeblockedbypp_onlyq = \
+    pd.read_csv(Path(input_path, f'X_ldr_condmeantimeblockedbypp_onlyq_{experiment}.csv'), index_col=0)
 
 # y vectors
-y_ldr_occ_mean = pd.read_csv(Path(data_path, f'y_ldr_occ_mean_{experiment}.csv'), index_col=0, squeeze=True)
-y_ldr_occ_p95 = pd.read_csv(Path(data_path, f'y_ldr_occ_p95_{experiment}.csv'), index_col=0, squeeze=True)
-y_prob_blockedby_pp = \
-    pd.read_csv(Path(data_path, f'y_prob_blockedby_pp_{experiment}.csv'), index_col=0, squeeze=True)
-y_condmeantime_blockedby_pp = \
-    pd.read_csv(Path(data_path, f'y_condmeantime_blockedby_pp_{experiment}.csv'), index_col=0, squeeze=True)
+y_ldr_occmean = pd.read_csv(Path(input_path, f'y_ldr_occmean_{experiment}.csv'), index_col=0, squeeze=True)
+y_ldr_occp95 = pd.read_csv(Path(input_path, f'y_ldr_occp95_{experiment}.csv'), index_col=0, squeeze=True)
+y_probblockedbypp = \
+    pd.read_csv(Path(input_path, f'y_probblockedbypp_{experiment}.csv'), index_col=0, squeeze=True)
+y_condmeantimeblockedbypp = \
+    pd.read_csv(Path(input_path, f'y_condmeantimeblockedbypp_{experiment}.csv'), index_col=0, squeeze=True)
 
 # Fit models
 
 # Queueing models
-ldr_occ_mean_q_load_results = \
-    crossval_summarize_mm('ldr_occ_mean_q_effload', 'ldr', 'occ_mean', X_ldr_q, y_ldr_occ_mean, scale=False,
+ldr_occmean_q_load_results = \
+    crossval_summarize_mm('ldr_occmean_q_effload', 'ldr', 'occmean', X_ldr_q, y_ldr_occmean, scale=False,
                           flavor='load', col_idx_arate=0, col_idx_meansvctime=18)
 
-ldr_occ_p95_q_sqrtload_results = \
-    crossval_summarize_mm('ldr_occ_p95_q_sqrteffload', 'ldr', 'occ_p95', X_ldr_q, y_ldr_occ_p95, scale=False,
+ldr_occp95_q_sqrtload_results = \
+    crossval_summarize_mm('ldr_occp95_q_sqrteffload', 'ldr', 'occp95', X_ldr_q, y_ldr_occp95, scale=False,
                           flavor='sqrtload', col_idx_arate=0, col_idx_meansvctime=18, load_pctile=0.95)
 
-prob_blockedby_pp_q_erlangc_results = \
-    crossval_summarize_mm('prob_blockedby_pp_q_erlangc', 'ldr', 'prob_blockedby_pp',
-                          X_ldr_q, y_prob_blockedby_pp,
+probblockedbypp_q_erlangc_results = \
+    crossval_summarize_mm('ldr_probblockedbypp_q_erlangc', 'ldr', 'probblockedbypp',
+                          X_ldr_q, y_probblockedbypp,
                           scale=False, fit_intercept=True,
                           flavor='erlangc', col_idx_arate=0, col_idx_meansvctime=4, col_idx_numservers=6)
 
-condmeantime_blockedby_pp_q_mgc_results = \
-    crossval_summarize_mm('condmeantime_blockedby_pp_q_mgc', 'ldr', 'condmeantime_blockedby_pp',
-                          X_ldr_q, y_condmeantime_blockedby_pp,
+condmeantimeblockedbypp_q_mgc_results = \
+    crossval_summarize_mm('ldr_condmeantimeblockedbypp_q_mgc', 'ldr', 'condmeantimeblockedbypp',
+                          X_ldr_q, y_condmeantimeblockedbypp,
                           scale=False, fit_intercept=True,
                           flavor='condmeanwaitldr', col_idx_arate=0, col_idx_meansvctime=4, col_idx_numservers=6,
                           col_idx_cv2svctime=15)
 
 # Linear models using only queueing approximation terms
-ldr_occ_mean_onlyq_lm_results = \
-    crossval_summarize_mm('ldr_occ_mean_onlyq_lm', 'ldr', 'occ_mean',
-                          X_ldr_occ_mean_onlyq, y_ldr_occ_mean, scale=False, flavor='lm')
+ldr_occmean_onlyq_lm_results = \
+    crossval_summarize_mm('ldr_occmean_onlyq_lm', 'ldr', 'occmean',
+                          X_ldr_occmean_onlyq, y_ldr_occmean, scale=False, flavor='lm')
 
-ldr_occ_p95_onlyq_lm_results = \
-    crossval_summarize_mm('ldr_occ_p95_onlyq_lm', 'ldr', 'occ_p95',
-                          X_ldr_occ_p95_onlyq, y_ldr_occ_p95, scale=False, flavor='lm')
+ldr_occp95_onlyq_lm_results = \
+    crossval_summarize_mm('ldr_occp95_onlyq_lm', 'ldr', 'occp95',
+                          X_ldr_occp95_onlyq, y_ldr_occp95, scale=False, flavor='lm')
 
-prob_blockedby_pp_onlyq_lm_results = \
-    crossval_summarize_mm('prob_blockedby_pp_onlyq_lm', 'ldr', 'pct_blockedby_pp',
-                          X_ldr_prob_blockedby_pp_onlyq, y_prob_blockedby_pp, scale=False, flavor='lm')
+probblockedbypp_onlyq_lm_results = \
+    crossval_summarize_mm('ldr_probblockedbypp_onlyq_lm', 'ldr', 'probblockedbypp',
+                          X_ldr_probblockedbypp_onlyq, y_probblockedbypp, scale=False, flavor='lm')
 
-condmeantime_blockedby_pp_onlyq_lm_results = \
-    crossval_summarize_mm('condmeantime_blockedby_pp_onlyq_lm', 'ldr', 'condmeantime_blockedby_pp',
-                          X_ldr_condmeantime_blockedby_pp_onlyq, y_condmeantime_blockedby_pp, scale=False, flavor='lm')
+condmeantimeblockedbypp_onlyq_lm_results = \
+    crossval_summarize_mm('ldr_condmeantimeblockedbypp_onlyq_lm', 'ldr', 'condmeantimeblockedbypp',
+                          X_ldr_condmeantimeblockedbypp_onlyq, y_condmeantimeblockedbypp, scale=False, flavor='lm')
 
 ## Linear regression (lm)
-ldr_occ_mean_basicq_lm_results = \
-    crossval_summarize_mm('ldr_occ_mean_basicq_lm', 'ldr', 'occ_mean',
-                          X_ldr_basicq, y_ldr_occ_mean, scale=False, flavor='lm')
+ldr_occmean_basicq_lm_results = \
+    crossval_summarize_mm('ldr_occmean_basicq_lm', 'ldr', 'occmean',
+                          X_ldr_basicq, y_ldr_occmean, scale=False, flavor='lm')
 
-ldr_occ_mean_q_lm_results = \
-    crossval_summarize_mm('ldr_occ_mean_q_lm', 'ldr', 'occ_mean',
-                          X_ldr_q, y_ldr_occ_mean, scale=False, flavor='lm')
+ldr_occmean_q_lm_results = \
+    crossval_summarize_mm('ldr_occmean_q_lm', 'ldr', 'occmean',
+                          X_ldr_q, y_ldr_occmean, scale=False, flavor='lm')
 
-ldr_occ_mean_noq_lm_results = \
-    crossval_summarize_mm('ldr_occ_mean_noq_lm', 'ldr', 'occ_mean',
-                          X_ldr_noq, y_ldr_occ_mean, scale=False, flavor='lm')
+ldr_occmean_noq_lm_results = \
+    crossval_summarize_mm('ldr_occmean_noq_lm', 'ldr', 'occmean',
+                          X_ldr_noq, y_ldr_occmean, scale=False, flavor='lm')
 
-ldr_occ_p95_basicq_lm_results = \
-    crossval_summarize_mm('ldr_occ_p95_basicq_lm', 'ldr', 'occ_p95',
-                          X_ldr_basicq, y_ldr_occ_p95, scale=False, flavor='lm')
+ldr_occp95_basicq_lm_results = \
+    crossval_summarize_mm('ldr_occp95_basicq_lm', 'ldr', 'occp95',
+                          X_ldr_basicq, y_ldr_occp95, scale=False, flavor='lm')
 
-ldr_occ_p95_q_lm_results = \
-    crossval_summarize_mm('ldr_occ_p95_q_lm', 'ldr', 'occ_p95', X_ldr_q, y_ldr_occ_p95, scale=False, flavor='lm')
+ldr_occp95_q_lm_results = \
+    crossval_summarize_mm('ldr_occp95_q_lm', 'ldr', 'occp95', X_ldr_q, y_ldr_occp95, scale=False, flavor='lm')
 
-ldr_occ_p95_noq_lm_results = \
-    crossval_summarize_mm('ldr_occ_p95_noq_lm', 'ldr', 'occ_p95', X_ldr_noq, y_ldr_occ_p95, scale=False, flavor='lm')
+ldr_occp95_noq_lm_results = \
+    crossval_summarize_mm('ldr_occp95_noq_lm', 'ldr', 'occp95', X_ldr_noq, y_ldr_occp95, scale=False, flavor='lm')
 
-prob_blockedby_pp_basicq_lm_results = \
-    crossval_summarize_mm('prob_blockedby_pp_basicq_lm', 'ldr', 'pct_blockedby_pp',
-                          X_ldr_basicq, y_prob_blockedby_pp,
+probblockedbypp_basicq_lm_results = \
+    crossval_summarize_mm('ldr_probblockedbypp_basicq_lm', 'ldr', 'probblockedbypp',
+                          X_ldr_basicq, y_probblockedbypp,
                           scale=False, fit_intercept=True, flavor='lm')
 
-prob_blockedby_pp_q_lm_results = \
-    crossval_summarize_mm('prob_blockedby_pp_q_lm', 'ldr', 'pct_blockedby_pp',
-                          X_ldr_q, y_prob_blockedby_pp,
+probblockedbypp_q_lm_results = \
+    crossval_summarize_mm('ldr_probblockedbypp_q_lm', 'ldr', 'probblockedbypp',
+                          X_ldr_q, y_probblockedbypp,
                           scale=False, fit_intercept=True, flavor='lm')
 
-prob_blockedby_pp_noq_lm_results = \
-    crossval_summarize_mm('prob_blockedby_pp_noq_lm', 'ldr', 'pct_blockedby_pp',
-                          X_ldr_noq, y_prob_blockedby_pp,
+probblockedbypp_noq_lm_results = \
+    crossval_summarize_mm('ldr_probblockedbypp_noq_lm', 'ldr', 'probblockedbypp',
+                          X_ldr_noq, y_probblockedbypp,
                           scale=False, fit_intercept=True, flavor='lm')
 
-condmeantime_blockedby_pp_basicq_lm_results = \
-    crossval_summarize_mm('condmeantime_blockedby_pp_basicq_lm', 'ldr', 'condmeantime_blockedby_pp',
-                          X_ldr_basicq, y_condmeantime_blockedby_pp,
+condmeantimeblockedbypp_basicq_lm_results = \
+    crossval_summarize_mm('ldr_condmeantimeblockedbypp_basicq_lm', 'ldr', 'condmeantimeblockedbypp',
+                          X_ldr_basicq, y_condmeantimeblockedbypp,
                           scale=False, fit_intercept=True, flavor='lm')
 
-condmeantime_blockedby_pp_q_lm_results = \
-    crossval_summarize_mm('condmeantime_blockedby_pp_q_lm', 'ldr', 'condmeantime_blockedby_pp',
-                          X_ldr_q, y_condmeantime_blockedby_pp,
+condmeantimeblockedbypp_q_lm_results = \
+    crossval_summarize_mm('ldr_condmeantimeblockedbypp_q_lm', 'ldr', 'condmeantimeblockedbypp',
+                          X_ldr_q, y_condmeantimeblockedbypp,
                           scale=False, fit_intercept=True, flavor='lm')
 
-condmeantime_blockedby_pp_noq_lm_results = \
-    crossval_summarize_mm('condmeantime_blockedby_pp_noq_lm', 'ldr', 'condmeantime_blockedby_pp',
-                          X_ldr_noq, y_condmeantime_blockedby_pp,
+condmeantimeblockedbypp_noq_lm_results = \
+    crossval_summarize_mm('ldr_condmeantimeblockedbypp_noq_lm', 'ldr', 'condmeantimeblockedbypp',
+                          X_ldr_noq, y_condmeantimeblockedbypp,
                           scale=False, fit_intercept=True, flavor='lm')
 
 # LassoCV (lassocv)
-ldr_occ_mean_basicq_lassocv_results = \
-    crossval_summarize_mm('ldr_occ_mean_basicq_lassocv', 'ldr', 'occ_mean', X_ldr_basicq, y_ldr_occ_mean,
+ldr_occmean_basicq_lassocv_results = \
+    crossval_summarize_mm('ldr_occmean_basicq_lassocv', 'ldr', 'occmean', X_ldr_basicq, y_ldr_occmean,
                           scale=True, flavor='lassocv', lasso_max_iter=3000)
 
-ldr_occ_mean_q_lassocv_results = \
-    crossval_summarize_mm('ldr_occ_mean_q_lassocv', 'ldr', 'occ_mean', X_ldr_q, y_ldr_occ_mean,
+ldr_occmean_q_lassocv_results = \
+    crossval_summarize_mm('ldr_occmean_q_lassocv', 'ldr', 'occmean', X_ldr_q, y_ldr_occmean,
                           scale=True, flavor='lassocv', lasso_max_iter=3000)
 
-ldr_occ_mean_noq_lassocv_results = \
-    crossval_summarize_mm('ldr_occ_mean_noq_lassocv', 'ldr', 'occ_mean', X_ldr_noq, y_ldr_occ_mean,
+ldr_occmean_noq_lassocv_results = \
+    crossval_summarize_mm('ldr_occmean_noq_lassocv', 'ldr', 'occmean', X_ldr_noq, y_ldr_occmean,
                           scale=True, flavor='lassocv', lasso_max_iter=3000)
 
-ldr_occ_p95_basicq_lassocv_results = \
-    crossval_summarize_mm('ldr_occ_p95_basicq_lassocv', 'ldr', 'occ_p95', X_ldr_basicq, y_ldr_occ_p95,
+ldr_occp95_basicq_lassocv_results = \
+    crossval_summarize_mm('ldr_occp95_basicq_lassocv', 'ldr', 'occp95', X_ldr_basicq, y_ldr_occp95,
                           scale=True, flavor='lassocv', lasso_max_iter=3000)
 
-ldr_occ_p95_q_lassocv_results = \
-    crossval_summarize_mm('ldr_occ_p95_q_lassocv', 'ldr', 'occ_p95', X_ldr_q, y_ldr_occ_p95,
+ldr_occp95_q_lassocv_results = \
+    crossval_summarize_mm('ldr_occp95_q_lassocv', 'ldr', 'occp95', X_ldr_q, y_ldr_occp95,
                           scale=True, flavor='lassocv', lasso_max_iter=3000)
 
-ldr_occ_p95_noq_lassocv_results = \
-    crossval_summarize_mm('ldr_occ_p95_noq_lassocv', 'ldr', 'occ_p95', X_ldr_noq, y_ldr_occ_p95,
+ldr_occp95_noq_lassocv_results = \
+    crossval_summarize_mm('ldr_occp95_noq_lassocv', 'ldr', 'occp95', X_ldr_noq, y_ldr_occp95,
                           scale=True, flavor='lassocv', lasso_max_iter=3000)
 
-prob_blockedby_pp_basicq_lassocv_results = \
-    crossval_summarize_mm('prob_blockedby_pp_basicq_lassocv', 'ldr', 'pct_blockedby_pp',
-                          X_ldr_basicq, y_prob_blockedby_pp,
+probblockedbypp_basicq_lassocv_results = \
+    crossval_summarize_mm('ldr_probblockedbypp_basicq_lassocv', 'ldr', 'probblockedbypp',
+                          X_ldr_basicq, y_probblockedbypp,
                           scale=True, flavor='lassocv', lasso_max_iter=3000)
 
-prob_blockedby_pp_q_lassocv_results = \
-    crossval_summarize_mm('prob_blockedby_pp_q_lassocv', 'ldr', 'pct_blockedby_pp',
-                          X_ldr_q, y_prob_blockedby_pp,
+probblockedbypp_q_lassocv_results = \
+    crossval_summarize_mm('ldr_probblockedbypp_q_lassocv', 'ldr', 'probblockedbypp',
+                          X_ldr_q, y_probblockedbypp,
                           scale=True, flavor='lassocv', lasso_max_iter=3000)
 
-prob_blockedby_pp_noq_lassocv_results = \
-    crossval_summarize_mm('prob_blockedby_pp_noq_lassocv', 'ldr', 'pct_blockedby_pp',
-                          X_ldr_noq, y_prob_blockedby_pp,
+probblockedbypp_noq_lassocv_results = \
+    crossval_summarize_mm('ldr_probblockedbypp_noq_lassocv', 'ldr', 'probblockedbypp',
+                          X_ldr_noq, y_probblockedbypp,
                           scale=True, flavor='lassocv', lasso_max_iter=3000)
 
-condmeantime_blockedby_pp_basicq_lassocv_results = \
-    crossval_summarize_mm('condmeantime_blockedby_pp_basicq_lassocv', 'ldr', 'condmeantime_blockedby_pp',
-                          X_ldr_basicq, y_condmeantime_blockedby_pp,
+condmeantimeblockedbypp_basicq_lassocv_results = \
+    crossval_summarize_mm('ldr_condmeantimeblockedbypp_basicq_lassocv', 'ldr', 'condmeantimeblockedbypp',
+                          X_ldr_basicq, y_condmeantimeblockedbypp,
                           scale=True, flavor='lassocv', lasso_max_iter=3000)
 
-condmeantime_blockedby_pp_q_lassocv_results = \
-    crossval_summarize_mm('condmeantime_blockedby_pp_q_lassocv', 'ldr', 'condmeantime_blockedby_pp',
-                          X_ldr_q, y_condmeantime_blockedby_pp,
+condmeantimeblockedbypp_q_lassocv_results = \
+    crossval_summarize_mm('ldr_condmeantimeblockedbypp_q_lassocv', 'ldr', 'condmeantimeblockedbypp',
+                          X_ldr_q, y_condmeantimeblockedbypp,
                           scale=True, flavor='lassocv', lasso_max_iter=3000)
 
-condmeantime_blockedby_pp_noq_lassocv_results = \
-    crossval_summarize_mm('condmeantime_blockedby_pp_noq_lassocv', 'ldr', 'condmeantime_blockedby_pp',
-                          X_ldr_noq, y_condmeantime_blockedby_pp,
+condmeantimeblockedbypp_noq_lassocv_results = \
+    crossval_summarize_mm('ldr_condmeantimeblockedbypp_noq_lassocv', 'ldr', 'condmeantimeblockedbypp',
+                          X_ldr_noq, y_condmeantimeblockedbypp,
                           scale=True, flavor='lassocv', lasso_max_iter=3000)
 
 # Polynomial regression (poly)
-ldr_occ_mean_basicq_poly_results = \
-    crossval_summarize_mm('ldr_occ_mean_basicq_poly', 'ldr', 'occ_mean',
-                          X_ldr_basicq, y_ldr_occ_mean, scale=False, flavor='poly')
+ldr_occmean_basicq_poly_results = \
+    crossval_summarize_mm('ldr_occmean_basicq_poly', 'ldr', 'occmean',
+                          X_ldr_basicq, y_ldr_occmean, scale=False, flavor='poly')
 
-ldr_occ_mean_q_poly_results = \
-    crossval_summarize_mm('ldr_occ_mean_q_poly', 'ldr', 'occ_mean',
-                          X_ldr_q, y_ldr_occ_mean, scale=False, flavor='poly')
+ldr_occmean_q_poly_results = \
+    crossval_summarize_mm('ldr_occmean_q_poly', 'ldr', 'occmean',
+                          X_ldr_q, y_ldr_occmean, scale=False, flavor='poly')
 
-ldr_occ_mean_noq_poly_results = \
-    crossval_summarize_mm('ldr_occ_mean_noq_poly', 'ldr', 'occ_mean',
-                          X_ldr_noq, y_ldr_occ_mean, scale=False,
+ldr_occmean_noq_poly_results = \
+    crossval_summarize_mm('ldr_occmean_noq_poly', 'ldr', 'occmean',
+                          X_ldr_noq, y_ldr_occmean, scale=False,
                           flavor='poly')
 
-ldr_occ_p95_basicq_poly_results = \
-    crossval_summarize_mm('ldr_occ_p95_basicq_poly', 'ldr', 'occ_p95',
-                          X_ldr_basicq, y_ldr_occ_p95, scale=False, flavor='poly')
+ldr_occp95_basicq_poly_results = \
+    crossval_summarize_mm('ldr_occp95_basicq_poly', 'ldr', 'occp95',
+                          X_ldr_basicq, y_ldr_occp95, scale=False, flavor='poly')
 
-ldr_occ_p95_q_poly_results = \
-    crossval_summarize_mm('ldr_occ_p95_q_poly', 'ldr', 'occ_p95',
-                          X_ldr_q, y_ldr_occ_p95, scale=False, flavor='poly')
+ldr_occp95_q_poly_results = \
+    crossval_summarize_mm('ldr_occp95_q_poly', 'ldr', 'occp95',
+                          X_ldr_q, y_ldr_occp95, scale=False, flavor='poly')
 
-ldr_occ_p95_noq_poly_results = \
-    crossval_summarize_mm('ldr_occ_p95_noq_poly', 'ldr', 'occ_p95',
-                          X_ldr_noq, y_ldr_occ_p95, scale=False, flavor='poly')
+ldr_occp95_noq_poly_results = \
+    crossval_summarize_mm('ldr_occp95_noq_poly', 'ldr', 'occp95',
+                          X_ldr_noq, y_ldr_occp95, scale=False, flavor='poly')
 
-prob_blockedby_pp_basicq_poly_results = \
-    crossval_summarize_mm('prob_blockedby_pp_basicq_poly', 'ldr', 'pct_blockedby_pp',
-                          X_ldr_basicq, y_prob_blockedby_pp,
+probblockedbypp_basicq_poly_results = \
+    crossval_summarize_mm('ldr_probblockedbypp_basicq_poly', 'ldr', 'probblockedbypp',
+                          X_ldr_basicq, y_probblockedbypp,
                           scale=False, flavor='poly')
 
-prob_blockedby_pp_q_poly_results = \
-    crossval_summarize_mm('prob_blockedby_pp_q_poly', 'ldr', 'pct_blockedby_pp',
-                          X_ldr_q, y_prob_blockedby_pp,
+probblockedbypp_q_poly_results = \
+    crossval_summarize_mm('ldr_probblockedbypp_q_poly', 'ldr', 'probblockedbypp',
+                          X_ldr_q, y_probblockedbypp,
                           scale=False, flavor='poly')
 
-prob_blockedby_pp_noq_poly_results = \
-    crossval_summarize_mm('prob_blockedby_pp_noq_poly', 'ldr', 'pct_blockedby_pp',
-                          X_ldr_noq, y_prob_blockedby_pp,
+probblockedbypp_noq_poly_results = \
+    crossval_summarize_mm('ldr_probblockedbypp_noq_poly', 'ldr', 'probblockedbypp',
+                          X_ldr_noq, y_probblockedbypp,
                           scale=False, flavor='poly')
 
-condmeantime_blockedby_pp_basicq_poly_results = \
-    crossval_summarize_mm('condmeantime_blockedby_pp_basicq_poly', 'ldr', 'condmeantime_blockedby_pp',
-                          X_ldr_basicq, y_condmeantime_blockedby_pp,
+condmeantimeblockedbypp_basicq_poly_results = \
+    crossval_summarize_mm('ldr_condmeantimeblockedbypp_basicq_poly', 'ldr', 'condmeantimeblockedbypp',
+                          X_ldr_basicq, y_condmeantimeblockedbypp,
                           scale=False, flavor='poly')
 
-condmeantime_blockedby_pp_q_poly_results = \
-    crossval_summarize_mm('condmeantime_blockedby_pp_q_poly', 'ldr', 'condmeantime_blockedby_pp',
-                          X_ldr_q, y_condmeantime_blockedby_pp,
+condmeantimeblockedbypp_q_poly_results = \
+    crossval_summarize_mm('ldr_condmeantimeblockedbypp_q_poly', 'ldr', 'condmeantimeblockedbypp',
+                          X_ldr_q, y_condmeantimeblockedbypp,
                           scale=False, flavor='poly')
 
-condmeantime_blockedby_pp_noq_poly_results = \
-    crossval_summarize_mm('condmeantime_blockedby_pp_noq_poly', 'ldr', 'condmeantime_blockedby_pp',
-                          X_ldr_noq, y_condmeantime_blockedby_pp,
+condmeantimeblockedbypp_noq_poly_results = \
+    crossval_summarize_mm('ldr_condmeantimeblockedbypp_noq_poly', 'ldr', 'condmeantimeblockedbypp',
+                          X_ldr_noq, y_condmeantimeblockedbypp,
                           scale=False, flavor='poly')
 
 # Random forest (rf)
-ldr_occ_mean_basicq_rf_results = \
-    crossval_summarize_mm('ldr_occ_mean_basicq_rf', 'ldr', 'occ_mean',
-                          X_ldr_basicq, y_ldr_occ_mean, scale=False, flavor='rf')
+ldr_occmean_basicq_rf_results = \
+    crossval_summarize_mm('ldr_occmean_basicq_rf', 'ldr', 'occmean',
+                          X_ldr_basicq, y_ldr_occmean, scale=False, flavor='rf')
 
-ldr_occ_mean_q_rf_results = \
-    crossval_summarize_mm('ldr_occ_mean_q_rf', 'ldr', 'occ_mean',
-                          X_ldr_q, y_ldr_occ_mean, scale=False, flavor='rf')
+ldr_occmean_q_rf_results = \
+    crossval_summarize_mm('ldr_occmean_q_rf', 'ldr', 'occmean',
+                          X_ldr_q, y_ldr_occmean, scale=False, flavor='rf')
 
-ldr_occ_mean_noq_rf_results = \
-    crossval_summarize_mm('ldr_occ_mean_noq_rf', 'ldr', 'occ_mean',
-                          X_ldr_noq, y_ldr_occ_mean, scale=False, flavor='rf')
+ldr_occmean_noq_rf_results = \
+    crossval_summarize_mm('ldr_occmean_noq_rf', 'ldr', 'occmean',
+                          X_ldr_noq, y_ldr_occmean, scale=False, flavor='rf')
 
-ldr_occ_p95_basicq_rf_results = \
-    crossval_summarize_mm('ldr_occ_p95_basicq_rf', 'ldr', 'occ_p95',
-                          X_ldr_basicq, y_ldr_occ_p95, scale=False, flavor='rf')
+ldr_occp95_basicq_rf_results = \
+    crossval_summarize_mm('ldr_occp95_basicq_rf', 'ldr', 'occp95',
+                          X_ldr_basicq, y_ldr_occp95, scale=False, flavor='rf')
 
-ldr_occ_p95_q_rf_results = \
-    crossval_summarize_mm('ldr_occ_p95_q_rf', 'ldr', 'occ_p95',
-                          X_ldr_q, y_ldr_occ_p95, scale=False, flavor='rf')
+ldr_occp95_q_rf_results = \
+    crossval_summarize_mm('ldr_occp95_q_rf', 'ldr', 'occp95',
+                          X_ldr_q, y_ldr_occp95, scale=False, flavor='rf')
 
-ldr_occ_p95_noq_rf_results = \
-    crossval_summarize_mm('ldr_occ_p95_noq_rf', 'ldr', 'occ_p95',
-                          X_ldr_noq, y_ldr_occ_p95, scale=False, flavor='rf')
+ldr_occp95_noq_rf_results = \
+    crossval_summarize_mm('ldr_occp95_noq_rf', 'ldr', 'occp95',
+                          X_ldr_noq, y_ldr_occp95, scale=False, flavor='rf')
 
-prob_blockedby_pp_basicq_rf_results = \
-    crossval_summarize_mm('prob_blockedby_pp_q_rf', 'ldr', 'pct_blockedby_pp',
-                          X_ldr_basicq, y_prob_blockedby_pp,
+probblockedbypp_basicq_rf_results = \
+    crossval_summarize_mm('ldr_probblockedbypp_q_rf', 'ldr', 'probblockedbypp',
+                          X_ldr_basicq, y_probblockedbypp,
                           scale=False, flavor='rf')
 
-prob_blockedby_pp_q_rf_results = \
-    crossval_summarize_mm('prob_blockedby_pp_q_rf', 'ldr', 'pct_blockedby_pp',
-                          X_ldr_q, y_prob_blockedby_pp,
+probblockedbypp_q_rf_results = \
+    crossval_summarize_mm('ldr_probblockedbypp_q_rf', 'ldr', 'probblockedbypp',
+                          X_ldr_q, y_probblockedbypp,
                           scale=False, flavor='rf')
 
-prob_blockedby_pp_noq_rf_results = \
-    crossval_summarize_mm('prob_blockedby_pp_noq_rf', 'ldr', 'pct_blockedby_pp',
-                          X_ldr_noq, y_prob_blockedby_pp,
+probblockedbypp_noq_rf_results = \
+    crossval_summarize_mm('ldr_probblockedbypp_noq_rf', 'ldr', 'probblockedbypp',
+                          X_ldr_noq, y_probblockedbypp,
                           scale=False, flavor='rf')
 
-condmeantime_blockedby_pp_basicq_rf_results = \
-    crossval_summarize_mm('condmeantime_blockedby_pp_basicq_rf', 'ldr', 'condmeantime_blockedby_pp',
-                          X_ldr_basicq, y_condmeantime_blockedby_pp,
+condmeantimeblockedbypp_basicq_rf_results = \
+    crossval_summarize_mm('ldr_condmeantimeblockedbypp_basicq_rf', 'ldr', 'condmeantimeblockedbypp',
+                          X_ldr_basicq, y_condmeantimeblockedbypp,
                           scale=False, flavor='rf')
 
-condmeantime_blockedby_pp_q_rf_results = \
-    crossval_summarize_mm('condmeantime_blockedby_pp_q_rf', 'ldr', 'condmeantime_blockedby_pp',
-                          X_ldr_q, y_condmeantime_blockedby_pp,
+condmeantimeblockedbypp_q_rf_results = \
+    crossval_summarize_mm('ldr_condmeantimeblockedbypp_q_rf', 'ldr', 'condmeantimeblockedbypp',
+                          X_ldr_q, y_condmeantimeblockedbypp,
                           scale=False, flavor='rf')
 
-condmeantime_blockedby_pp_noq_rf_results = \
-    crossval_summarize_mm('condmeantime_blockedby_pp_noq_rf', 'ldr', 'condmeantime_blockedby_pp',
-                          X_ldr_noq, y_condmeantime_blockedby_pp,
+condmeantimeblockedbypp_noq_rf_results = \
+    crossval_summarize_mm('ldr_condmeantimeblockedbypp_noq_rf', 'ldr', 'condmeantimeblockedbypp',
+                          X_ldr_noq, y_condmeantimeblockedbypp,
                           scale=False, flavor='rf')
 
 # Support vector regression (svr)
-ldr_occ_mean_basicq_svr_results = \
-    crossval_summarize_mm('ldr_occ_mean_basicq_svr', 'ldr', 'occ_mean',
-                          X_ldr_basicq, y_ldr_occ_mean, flavor='svr', scale=True)
+ldr_occmean_basicq_svr_results = \
+    crossval_summarize_mm('ldr_occmean_basicq_svr', 'ldr', 'occmean',
+                          X_ldr_basicq, y_ldr_occmean, flavor='svr', scale=True)
 
-ldr_occ_mean_q_svr_results = \
-    crossval_summarize_mm('ldr_occ_mean_q_svr', 'ldr', 'occ_mean',
-                          X_ldr_q, y_ldr_occ_mean, flavor='svr', scale=True)
+ldr_occmean_q_svr_results = \
+    crossval_summarize_mm('ldr_occmean_q_svr', 'ldr', 'occmean',
+                          X_ldr_q, y_ldr_occmean, flavor='svr', scale=True)
 
-ldr_occ_mean_noq_svr_results = \
-    crossval_summarize_mm('ldr_occ_mean_noq_svr', 'ldr', 'occ_mean',
-                          X_ldr_noq, y_ldr_occ_mean, flavor='svr', scale=True)
+ldr_occmean_noq_svr_results = \
+    crossval_summarize_mm('ldr_occmean_noq_svr', 'ldr', 'occmean',
+                          X_ldr_noq, y_ldr_occmean, flavor='svr', scale=True)
 
-ldr_occ_p95_basicq_svr_results = \
-    crossval_summarize_mm('ldr_occ_p95_basicq_svr', 'ldr', 'occ_p95',
-                          X_ldr_basicq, y_ldr_occ_p95, flavor='svr', scale=True)
+ldr_occp95_basicq_svr_results = \
+    crossval_summarize_mm('ldr_occp95_basicq_svr', 'ldr', 'occp95',
+                          X_ldr_basicq, y_ldr_occp95, flavor='svr', scale=True)
 
-ldr_occ_p95_q_svr_results = \
-    crossval_summarize_mm('ldr_occ_p95_q_svr', 'ldr', 'occ_p95',
-                          X_ldr_q, y_ldr_occ_p95, flavor='svr', scale=True)
+ldr_occp95_q_svr_results = \
+    crossval_summarize_mm('ldr_occp95_q_svr', 'ldr', 'occp95',
+                          X_ldr_q, y_ldr_occp95, flavor='svr', scale=True)
 
-ldr_occ_p95_noq_svr_results = \
-    crossval_summarize_mm('ldr_occ_p95_noq_svr', 'ldr', 'occ_p95',
-                          X_ldr_noq, y_ldr_occ_p95, flavor='svr', scale=True)
+ldr_occp95_noq_svr_results = \
+    crossval_summarize_mm('ldr_occp95_noq_svr', 'ldr', 'occp95',
+                          X_ldr_noq, y_ldr_occp95, flavor='svr', scale=True)
 
-prob_blockedby_pp_basicq_svr_results = \
-    crossval_summarize_mm('prob_blockedby_pp_basicq_svr', 'ldr', 'pct_blockedby_pp',
-                          X_ldr_basicq, y_prob_blockedby_pp,
+probblockedbypp_basicq_svr_results = \
+    crossval_summarize_mm('ldr_probblockedbypp_basicq_svr', 'ldr', 'probblockedbypp',
+                          X_ldr_basicq, y_probblockedbypp,
                           scale=True, flavor='svr')
 
-prob_blockedby_pp_q_svr_results = \
-    crossval_summarize_mm('prob_blockedby_pp_q_svr', 'ldr', 'pct_blockedby_pp',
-                          X_ldr_q, y_prob_blockedby_pp,
+probblockedbypp_q_svr_results = \
+    crossval_summarize_mm('ldr_probblockedbypp_q_svr', 'ldr', 'probblockedbypp',
+                          X_ldr_q, y_probblockedbypp,
                           scale=True, flavor='svr')
 
-prob_blockedby_pp_noq_svr_results = \
-    crossval_summarize_mm('prob_blockedby_pp_noq_svr', 'ldr', 'pct_blockedby_pp',
-                          X_ldr_noq, y_prob_blockedby_pp,
+probblockedbypp_noq_svr_results = \
+    crossval_summarize_mm('ldr_probblockedbypp_noq_svr', 'ldr', 'probblockedbypp',
+                          X_ldr_noq, y_probblockedbypp,
                           scale=True, flavor='svr')
 
-condmeantime_blockedby_pp_basicq_svr_results = \
-    crossval_summarize_mm('condmeantime_blockedby_pp_basicq_svr', 'ldr', 'condmeantime_blockedby_pp',
-                          X_ldr_basicq, y_condmeantime_blockedby_pp,
+condmeantimeblockedbypp_basicq_svr_results = \
+    crossval_summarize_mm('ldr_condmeantimeblockedbypp_basicq_svr', 'ldr', 'condmeantimeblockedbypp',
+                          X_ldr_basicq, y_condmeantimeblockedbypp,
                           scale=True, flavor='svr')
 
-condmeantime_blockedby_pp_q_svr_results = \
-    crossval_summarize_mm('condmeantime_blockedby_pp_q_svr', 'ldr', 'condmeantime_blockedbyldr',
-                          X_ldr_q, y_condmeantime_blockedby_pp,
+condmeantimeblockedbypp_q_svr_results = \
+    crossval_summarize_mm('ldr_condmeantimeblockedbypp_q_svr', 'ldr', 'condmeantime_blockedbyldr',
+                          X_ldr_q, y_condmeantimeblockedbypp,
                           scale=True, flavor='svr')
 
-condmeantime_blockedby_pp_noq_svr_results = \
-    crossval_summarize_mm('condmeantime_blockedby_pp_noq_svr', 'ldr', 'condmeantime_blockedby_pp',
-                          X_ldr_noq, y_condmeantime_blockedby_pp,
+condmeantimeblockedbypp_noq_svr_results = \
+    crossval_summarize_mm('ldr_condmeantimeblockedbypp_noq_svr', 'ldr', 'condmeantimeblockedbypp',
+                          X_ldr_noq, y_condmeantimeblockedbypp,
                           scale=True, flavor='svr')
 
 # MLPRegressor Neural net (nn)
-ldr_occ_mean_basicq_nn_results = \
-    crossval_summarize_mm('ldr_occ_mean_basicq_nn', 'ldr', 'occ_mean',
-                          X_ldr_basicq, y_ldr_occ_mean, flavor='nn', scale=True)
+ldr_occmean_basicq_nn_results = \
+    crossval_summarize_mm('ldr_occmean_basicq_nn', 'ldr', 'occmean',
+                          X_ldr_basicq, y_ldr_occmean, flavor='nn', scale=True)
 
-ldr_occ_mean_q_nn_results = \
-    crossval_summarize_mm('ldr_occ_mean_q_nn', 'ldr', 'occ_mean',
-                          X_ldr_q, y_ldr_occ_mean, flavor='nn', scale=True)
+ldr_occmean_q_nn_results = \
+    crossval_summarize_mm('ldr_occmean_q_nn', 'ldr', 'occmean',
+                          X_ldr_q, y_ldr_occmean, flavor='nn', scale=True)
 
-ldr_occ_mean_noq_nn_results = \
-    crossval_summarize_mm('ldr_occ_mean_noq_nn', 'ldr', 'occ_mean', X_ldr_noq, y_ldr_occ_mean, flavor='nn', scale=True)
+ldr_occmean_noq_nn_results = \
+    crossval_summarize_mm('ldr_occmean_noq_nn', 'ldr', 'occmean', X_ldr_noq, y_ldr_occmean, flavor='nn', scale=True)
 
-ldr_occ_p95_basicq_nn_results = \
-    crossval_summarize_mm('ldr_occ_p95_basicq_nn', 'ldr', 'occ_p95',
-                          X_ldr_basicq, y_ldr_occ_p95, flavor='nn', scale=True)
+ldr_occp95_basicq_nn_results = \
+    crossval_summarize_mm('ldr_occp95_basicq_nn', 'ldr', 'occp95',
+                          X_ldr_basicq, y_ldr_occp95, flavor='nn', scale=True)
 
-ldr_occ_p95_q_nn_results = \
-    crossval_summarize_mm('ldr_occ_p95_q_nn', 'ldr', 'occ_p95',
-                          X_ldr_q, y_ldr_occ_p95, flavor='nn', scale=True)
+ldr_occp95_q_nn_results = \
+    crossval_summarize_mm('ldr_occp95_q_nn', 'ldr', 'occp95',
+                          X_ldr_q, y_ldr_occp95, flavor='nn', scale=True)
 
-ldr_occ_p95_noq_nn_results = \
-    crossval_summarize_mm('ldr_occ_p95_noq_nn', 'ldr', 'occ_p95',
-                          X_ldr_noq, y_ldr_occ_p95, flavor='nn', scale=True)
+ldr_occp95_noq_nn_results = \
+    crossval_summarize_mm('ldr_occp95_noq_nn', 'ldr', 'occp95',
+                          X_ldr_noq, y_ldr_occp95, flavor='nn', scale=True)
 
-prob_blockedby_pp_basicq_nn_results = \
-    crossval_summarize_mm('prob_blockedby_pp_basicq_nn', 'ldr', 'pct_blockedby_pp',
-                          X_ldr_basicq, y_prob_blockedby_pp,
+probblockedbypp_basicq_nn_results = \
+    crossval_summarize_mm('ldr_probblockedbypp_basicq_nn', 'ldr', 'probblockedbypp',
+                          X_ldr_basicq, y_probblockedbypp,
                           scale=True, flavor='nn')
 
-prob_blockedby_pp_q_nn_results = \
-    crossval_summarize_mm('prob_blockedby_pp_q_nn', 'ldr', 'pct_blockedby_pp',
-                          X_ldr_q, y_prob_blockedby_pp,
+probblockedbypp_q_nn_results = \
+    crossval_summarize_mm('ldr_probblockedbypp_q_nn', 'ldr', 'probblockedbypp',
+                          X_ldr_q, y_probblockedbypp,
                           scale=True, flavor='nn')
 
-prob_blockedby_pp_noq_nn_results = \
-    crossval_summarize_mm('prob_blockedby_pp_noq_nn', 'ldr', 'pct_blockedby_pp',
-                          X_ldr_noq, y_prob_blockedby_pp,
+probblockedbypp_noq_nn_results = \
+    crossval_summarize_mm('ldr_probblockedbypp_noq_nn', 'ldr', 'probblockedbypp',
+                          X_ldr_noq, y_probblockedbypp,
                           scale=True, flavor='nn')
 
-condmeantime_blockedby_pp_basicq_nn_results = \
-    crossval_summarize_mm('condmeantime_blockedby_pp_basicq_nn', 'ldr', 'condmeantime_blockedby_pp',
-                          X_ldr_basicq, y_condmeantime_blockedby_pp,
+condmeantimeblockedbypp_basicq_nn_results = \
+    crossval_summarize_mm('ldr_condmeantimeblockedbypp_basicq_nn', 'ldr', 'condmeantimeblockedbypp',
+                          X_ldr_basicq, y_condmeantimeblockedbypp,
                           scale=True, flavor='nn')
 
-condmeantime_blockedby_pp_q_nn_results = \
-    crossval_summarize_mm('condmeantime_blockedby_pp_q_nn', 'ldr', 'condmeantime_blockedby_pp',
-                          X_ldr_q, y_condmeantime_blockedby_pp,
+condmeantimeblockedbypp_q_nn_results = \
+    crossval_summarize_mm('ldr_condmeantimeblockedbypp_q_nn', 'ldr', 'condmeantimeblockedbypp',
+                          X_ldr_q, y_condmeantimeblockedbypp,
                           scale=True, flavor='nn')
 
-condmeantime_blockedby_pp_noq_nn_results = \
-    crossval_summarize_mm('condmeantime_blockedby_pp_noq_nn', 'ldr', 'condmeantime_blockedby_pp',
-                          X_ldr_noq, y_condmeantime_blockedby_pp,
+condmeantimeblockedbypp_noq_nn_results = \
+    crossval_summarize_mm('ldr_condmeantimeblockedbypp_noq_nn', 'ldr', 'condmeantimeblockedbypp',
+                          X_ldr_noq, y_condmeantimeblockedbypp,
                           scale=True, flavor='nn')
 
 
 
 
-ldr_results = {'ldr_occ_mean_basicq_lm_results': ldr_occ_mean_basicq_lm_results,
-               'ldr_occ_mean_q_lm_results': ldr_occ_mean_q_lm_results,
-               'ldr_occ_mean_noq_lm_results': ldr_occ_mean_noq_lm_results,
-               'ldr_occ_mean_basicq_lassocv_results': ldr_occ_mean_basicq_lassocv_results,
-               'ldr_occ_mean_q_lassocv_results': ldr_occ_mean_q_lassocv_results,
-               'ldr_occ_mean_noq_lassocv_results': ldr_occ_mean_noq_lassocv_results,
-               'ldr_occ_mean_basicq_poly_results': ldr_occ_mean_basicq_poly_results,
-               'ldr_occ_mean_q_poly_results': ldr_occ_mean_q_poly_results,
-               'ldr_occ_mean_noq_poly_results': ldr_occ_mean_noq_poly_results,
-               'ldr_occ_mean_basicq_rf_results': ldr_occ_mean_basicq_rf_results,
-               'ldr_occ_mean_q_rf_results': ldr_occ_mean_q_rf_results,
-               'ldr_occ_mean_noq_rf_results': ldr_occ_mean_noq_rf_results,
-               'ldr_occ_mean_basicq_svr_results': ldr_occ_mean_basicq_svr_results,
-               'ldr_occ_mean_q_svr_results': ldr_occ_mean_q_svr_results,
-               'ldr_occ_mean_noq_svr_results': ldr_occ_mean_noq_svr_results,
-               'ldr_occ_mean_basicq_nn_results': ldr_occ_mean_basicq_nn_results,
-               'ldr_occ_mean_q_nn_results': ldr_occ_mean_q_nn_results,
-               'ldr_occ_mean_noq_nn_results': ldr_occ_mean_noq_nn_results,
-               'ldr_occ_mean_q_load_results': ldr_occ_mean_q_load_results,
-               'ldr_occ_p95_basicq_lm_results': ldr_occ_p95_basicq_lm_results,
-               'ldr_occ_p95_q_lm_results': ldr_occ_p95_q_lm_results,
-               'ldr_occ_p95_noq_lm_results': ldr_occ_p95_noq_lm_results,
-               'ldr_occ_p95_basicq_lassocv_results': ldr_occ_p95_basicq_lassocv_results,
-               'ldr_occ_p95_q_lassocv_results': ldr_occ_p95_q_lassocv_results,
-               'ldr_occ_p95_noq_lassocv_results': ldr_occ_p95_noq_lassocv_results,
-               'ldr_occ_p95_basicq_poly_results': ldr_occ_p95_basicq_poly_results,
-               'ldr_occ_p95_q_poly_results': ldr_occ_p95_q_poly_results,
-               'ldr_occ_p95_noq_poly_results': ldr_occ_p95_noq_poly_results,
-               'ldr_occ_p95_basicq_rf_results': ldr_occ_p95_basicq_rf_results,
-               'ldr_occ_p95_q_rf_results': ldr_occ_p95_q_rf_results,
-               'ldr_occ_p95_noq_rf_results': ldr_occ_p95_noq_rf_results,
-               'ldr_occ_p95_basicq_svr_results': ldr_occ_p95_basicq_svr_results,
-               'ldr_occ_p95_q_svr_results': ldr_occ_p95_q_svr_results,
-               'ldr_occ_p95_noq_svr_results': ldr_occ_p95_noq_svr_results,
-               'ldr_occ_p95_basicq_nn_results': ldr_occ_p95_basicq_nn_results,
-               'ldr_occ_p95_q_nn_results': ldr_occ_p95_q_nn_results,
-               'ldr_occ_p95_noq_nn_results': ldr_occ_p95_noq_nn_results,
-               'ldr_occ_p95_q_sqrtload_results': ldr_occ_p95_q_sqrtload_results,
-               'prob_blockedby_pp_basicq_lm_results': prob_blockedby_pp_basicq_lm_results,
-               'prob_blockedby_pp_q_lm_results': prob_blockedby_pp_q_lm_results,
-               'prob_blockedby_pp_noq_lm_results': prob_blockedby_pp_noq_lm_results,
-               'prob_blockedby_pp_basicq_lassocv_results': prob_blockedby_pp_basicq_lassocv_results,
-               'prob_blockedby_pp_q_lassocv_results': prob_blockedby_pp_q_lassocv_results,
-               'prob_blockedby_pp_noq_lassocv_results': prob_blockedby_pp_noq_lassocv_results,
-               'prob_blockedby_pp_basicq_poly_results': prob_blockedby_pp_basicq_poly_results,
-               'prob_blockedby_pp_q_poly_results': prob_blockedby_pp_q_poly_results,
-               'prob_blockedby_pp_noq_poly_results': prob_blockedby_pp_noq_poly_results,
-               'prob_blockedby_pp_basicq_rf_results': prob_blockedby_pp_basicq_rf_results,
-               'prob_blockedby_pp_q_rf_results': prob_blockedby_pp_q_rf_results,
-               'prob_blockedby_pp_noq_rf_results': prob_blockedby_pp_noq_rf_results,
-               'prob_blockedby_pp_basicq_svr_results': prob_blockedby_pp_basicq_svr_results,
-               'prob_blockedby_pp_q_svr_results': prob_blockedby_pp_q_svr_results,
-               'prob_blockedby_pp_noq_svr_results': prob_blockedby_pp_noq_svr_results,
-               'prob_blockedby_pp_basicq_nn_results': prob_blockedby_pp_basicq_nn_results,
-               'prob_blockedby_pp_q_nn_results': prob_blockedby_pp_q_nn_results,
-               'prob_blockedby_pp_noq_nn_results': prob_blockedby_pp_noq_nn_results,
-               'prob_blockedby_pp_q_erlangc_results': prob_blockedby_pp_q_erlangc_results,
-               'condmeantime_blockedby_pp_basicq_lm_results': condmeantime_blockedby_pp_basicq_lm_results,
-               'condmeantime_blockedby_pp_q_lm_results': condmeantime_blockedby_pp_q_lm_results,
-               'condmeantime_blockedby_pp_noq_lm_results': condmeantime_blockedby_pp_noq_lm_results,
-               'condmeantime_blockedby_pp_basicq_lassocv_results': condmeantime_blockedby_pp_basicq_lassocv_results,
-               'condmeantime_blockedby_pp_q_lassocv_results': condmeantime_blockedby_pp_q_lassocv_results,
-               'condmeantime_blockedby_pp_noq_lassocv_results': condmeantime_blockedby_pp_noq_lassocv_results,
-               'condmeantime_blockedby_pp_basicq_poly_results': condmeantime_blockedby_pp_basicq_poly_results,
-               'condmeantime_blockedby_pp_q_poly_results': condmeantime_blockedby_pp_q_poly_results,
-               'condmeantime_blockedby_pp_noq_poly_results': condmeantime_blockedby_pp_noq_poly_results,
-               'condmeantime_blockedby_pp_basicq_rf_results': condmeantime_blockedby_pp_basicq_rf_results,
-               'condmeantime_blockedby_pp_q_rf_results': condmeantime_blockedby_pp_q_rf_results,
-               'condmeantime_blockedby_pp_noq_rf_results': condmeantime_blockedby_pp_noq_rf_results,
-               'condmeantime_blockedby_pp_basicq_svr_results': condmeantime_blockedby_pp_basicq_svr_results,
-               'condmeantime_blockedby_pp_q_svr_results': condmeantime_blockedby_pp_q_svr_results,
-               'condmeantime_blockedby_pp_noq_svr_results': condmeantime_blockedby_pp_noq_svr_results,
-               'condmeantime_blockedby_pp_basicq_nn_results': condmeantime_blockedby_pp_basicq_nn_results,
-               'condmeantime_blockedby_pp_q_nn_results': condmeantime_blockedby_pp_q_nn_results,
-               'condmeantime_blockedby_pp_noq_nn_results': condmeantime_blockedby_pp_noq_nn_results,
-               'condmeantime_blockedby_pp_q_mgc_results' : condmeantime_blockedby_pp_q_mgc_results,
-               'ldr_occ_mean_onlyq_lm_results': ldr_occ_mean_onlyq_lm_results,
-               'ldr_occ_p95_onlyq_lm_results': ldr_occ_p95_onlyq_lm_results,
-               'prob_blockedby_pp_onlyq_lm_results': prob_blockedby_pp_onlyq_lm_results,
-               'condmeantime_blockedby_pp_onlyq_lm_results': condmeantime_blockedby_pp_onlyq_lm_results
+ldr_results = {'ldr_occmean_basicq_lm_results': ldr_occmean_basicq_lm_results,
+               'ldr_occmean_q_lm_results': ldr_occmean_q_lm_results,
+               'ldr_occmean_noq_lm_results': ldr_occmean_noq_lm_results,
+               'ldr_occmean_basicq_lassocv_results': ldr_occmean_basicq_lassocv_results,
+               'ldr_occmean_q_lassocv_results': ldr_occmean_q_lassocv_results,
+               'ldr_occmean_noq_lassocv_results': ldr_occmean_noq_lassocv_results,
+               'ldr_occmean_basicq_poly_results': ldr_occmean_basicq_poly_results,
+               'ldr_occmean_q_poly_results': ldr_occmean_q_poly_results,
+               'ldr_occmean_noq_poly_results': ldr_occmean_noq_poly_results,
+               'ldr_occmean_basicq_rf_results': ldr_occmean_basicq_rf_results,
+               'ldr_occmean_q_rf_results': ldr_occmean_q_rf_results,
+               'ldr_occmean_noq_rf_results': ldr_occmean_noq_rf_results,
+               'ldr_occmean_basicq_svr_results': ldr_occmean_basicq_svr_results,
+               'ldr_occmean_q_svr_results': ldr_occmean_q_svr_results,
+               'ldr_occmean_noq_svr_results': ldr_occmean_noq_svr_results,
+               'ldr_occmean_basicq_nn_results': ldr_occmean_basicq_nn_results,
+               'ldr_occmean_q_nn_results': ldr_occmean_q_nn_results,
+               'ldr_occmean_noq_nn_results': ldr_occmean_noq_nn_results,
+               'ldr_occmean_q_load_results': ldr_occmean_q_load_results,
+               'ldr_occp95_basicq_lm_results': ldr_occp95_basicq_lm_results,
+               'ldr_occp95_q_lm_results': ldr_occp95_q_lm_results,
+               'ldr_occp95_noq_lm_results': ldr_occp95_noq_lm_results,
+               'ldr_occp95_basicq_lassocv_results': ldr_occp95_basicq_lassocv_results,
+               'ldr_occp95_q_lassocv_results': ldr_occp95_q_lassocv_results,
+               'ldr_occp95_noq_lassocv_results': ldr_occp95_noq_lassocv_results,
+               'ldr_occp95_basicq_poly_results': ldr_occp95_basicq_poly_results,
+               'ldr_occp95_q_poly_results': ldr_occp95_q_poly_results,
+               'ldr_occp95_noq_poly_results': ldr_occp95_noq_poly_results,
+               'ldr_occp95_basicq_rf_results': ldr_occp95_basicq_rf_results,
+               'ldr_occp95_q_rf_results': ldr_occp95_q_rf_results,
+               'ldr_occp95_noq_rf_results': ldr_occp95_noq_rf_results,
+               'ldr_occp95_basicq_svr_results': ldr_occp95_basicq_svr_results,
+               'ldr_occp95_q_svr_results': ldr_occp95_q_svr_results,
+               'ldr_occp95_noq_svr_results': ldr_occp95_noq_svr_results,
+               'ldr_occp95_basicq_nn_results': ldr_occp95_basicq_nn_results,
+               'ldr_occp95_q_nn_results': ldr_occp95_q_nn_results,
+               'ldr_occp95_noq_nn_results': ldr_occp95_noq_nn_results,
+               'ldr_occp95_q_sqrtload_results': ldr_occp95_q_sqrtload_results,
+               'ldr_probblockedbypp_basicq_lm_results': probblockedbypp_basicq_lm_results,
+               'ldr_probblockedbypp_q_lm_results': probblockedbypp_q_lm_results,
+               'ldr_probblockedbypp_noq_lm_results': probblockedbypp_noq_lm_results,
+               'ldr_probblockedbypp_basicq_lassocv_results': probblockedbypp_basicq_lassocv_results,
+               'ldr_probblockedbypp_q_lassocv_results': probblockedbypp_q_lassocv_results,
+               'ldr_probblockedbypp_noq_lassocv_results': probblockedbypp_noq_lassocv_results,
+               'ldr_probblockedbypp_basicq_poly_results': probblockedbypp_basicq_poly_results,
+               'ldr_probblockedbypp_q_poly_results': probblockedbypp_q_poly_results,
+               'ldr_probblockedbypp_noq_poly_results': probblockedbypp_noq_poly_results,
+               'ldr_probblockedbypp_basicq_rf_results': probblockedbypp_basicq_rf_results,
+               'ldr_probblockedbypp_q_rf_results': probblockedbypp_q_rf_results,
+               'ldr_probblockedbypp_noq_rf_results': probblockedbypp_noq_rf_results,
+               'ldr_probblockedbypp_basicq_svr_results': probblockedbypp_basicq_svr_results,
+               'ldr_probblockedbypp_q_svr_results': probblockedbypp_q_svr_results,
+               'ldr_probblockedbypp_noq_svr_results': probblockedbypp_noq_svr_results,
+               'ldr_probblockedbypp_basicq_nn_results': probblockedbypp_basicq_nn_results,
+               'ldr_probblockedbypp_q_nn_results': probblockedbypp_q_nn_results,
+               'ldr_probblockedbypp_noq_nn_results': probblockedbypp_noq_nn_results,
+               'ldr_probblockedbypp_q_erlangc_results': probblockedbypp_q_erlangc_results,
+               'ldr_condmeantimeblockedbypp_basicq_lm_results': condmeantimeblockedbypp_basicq_lm_results,
+               'ldr_condmeantimeblockedbypp_q_lm_results': condmeantimeblockedbypp_q_lm_results,
+               'ldr_condmeantimeblockedbypp_noq_lm_results': condmeantimeblockedbypp_noq_lm_results,
+               'ldr_condmeantimeblockedbypp_basicq_lassocv_results': condmeantimeblockedbypp_basicq_lassocv_results,
+               'ldr_condmeantimeblockedbypp_q_lassocv_results': condmeantimeblockedbypp_q_lassocv_results,
+               'ldr_condmeantimeblockedbypp_noq_lassocv_results': condmeantimeblockedbypp_noq_lassocv_results,
+               'ldr_condmeantimeblockedbypp_basicq_poly_results': condmeantimeblockedbypp_basicq_poly_results,
+               'ldr_condmeantimeblockedbypp_q_poly_results': condmeantimeblockedbypp_q_poly_results,
+               'ldr_condmeantimeblockedbypp_noq_poly_results': condmeantimeblockedbypp_noq_poly_results,
+               'ldr_condmeantimeblockedbypp_basicq_rf_results': condmeantimeblockedbypp_basicq_rf_results,
+               'ldr_condmeantimeblockedbypp_q_rf_results': condmeantimeblockedbypp_q_rf_results,
+               'ldr_condmeantimeblockedbypp_noq_rf_results': condmeantimeblockedbypp_noq_rf_results,
+               'ldr_condmeantimeblockedbypp_basicq_svr_results': condmeantimeblockedbypp_basicq_svr_results,
+               'ldr_condmeantimeblockedbypp_q_svr_results': condmeantimeblockedbypp_q_svr_results,
+               'ldr_condmeantimeblockedbypp_noq_svr_results': condmeantimeblockedbypp_noq_svr_results,
+               'ldr_condmeantimeblockedbypp_basicq_nn_results': condmeantimeblockedbypp_basicq_nn_results,
+               'ldr_condmeantimeblockedbypp_q_nn_results': condmeantimeblockedbypp_q_nn_results,
+               'ldr_condmeantimeblockedbypp_noq_nn_results': condmeantimeblockedbypp_noq_nn_results,
+               'ldr_condmeantimeblockedbypp_q_mgc_results' : condmeantimeblockedbypp_q_mgc_results,
+               'ldr_occmean_onlyq_lm_results': ldr_occmean_onlyq_lm_results,
+               'ldr_occp95_onlyq_lm_results': ldr_occp95_onlyq_lm_results,
+               'ldr_probblockedbypp_onlyq_lm_results': probblockedbypp_onlyq_lm_results,
+               'ldr_condmeantimeblockedbypp_onlyq_lm_results': condmeantimeblockedbypp_onlyq_lm_results
                }
 
 
-create_cv_plots(experiment, unit, ldr_results, Path(figures_path))
-create_coeff_plots(experiment, unit, ldr_results, Path(figures_path))
+create_cv_plots(experiment, unit, ldr_results, figures_path)
+create_coeff_plots(experiment, unit, ldr_results, figures_path)
 
-metrics_df = create_metrics_df(ldr_results, Path("output_path"))
-metrics_df.to_csv(Path(output_path, f"{experiment}_{unit}_metrics_df.csv"), index=False)
+metrics_df = create_metrics_df(ldr_results)
+metrics_df.to_csv(metrics_path_filename, index=False)
 
 
 sys.setrecursionlimit(10000)
 # Pickle the results
-with open(Path(output_path, pickle_filename), 'wb') as persisted_file:
+with open(pickle_path_filename, 'wb') as persisted_file:
     pickle.dump(ldr_results, persisted_file)

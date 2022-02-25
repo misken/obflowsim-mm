@@ -73,6 +73,8 @@ def crossval_summarize_mm(unit_pm_qdata_model, unit, measure, X, y, flavor='lm',
 
     plt.ioff()
 
+    qdata = unit_pm_qdata_model.split('_')[2]
+
     # Create name label lists
     partitions = ['test', 'train']
     metric_names = [f"{p}_{s}" for s in scoring for p in partitions]
@@ -227,6 +229,7 @@ def crossval_summarize_mm(unit_pm_qdata_model, unit, measure, X, y, flavor='lm',
                    'flavor': flavor,
                    'unit': unit,
                    'model': model_final,
+                   'qdata' : qdata,
                    'cv': cv_iterator,
                    'coeffs_df': unscaled_coeffs_df,
                    'metrics_df': metrics_df,
@@ -243,6 +246,7 @@ def crossval_summarize_mm(unit_pm_qdata_model, unit, measure, X, y, flavor='lm',
                    'flavor': flavor,
                    'unit': unit,
                    'model': model_final,
+                   'qdata': qdata,
                    'cv': cv_iterator,
                    'metrics_df': metrics_df,
                    'predictions': predictions,
