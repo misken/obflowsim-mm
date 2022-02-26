@@ -23,9 +23,7 @@ each scenario run.
 Create the scenario input file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The scenario input file is a csv file containing (at least) the following columns:
-
-The scenario input file is generated from a *scenario recipe* - a YAML 
+The scenario input file is generated from a *scenario recipe* - a YAML
 formatted file that specifies one or more values for each of the simulation input
 parameters. Here is an example:
 
@@ -67,7 +65,7 @@ parameters. Here is an example:
 A few important things to note:
 
 * The recipe file can be created manually or via the code in `scenario_scratchpad.py`. 
-* The `acc_obs`, `acc_ldr`, and `acc_pp` accomodation probabilities lead to capacity lower bounds
+* The `acc_obs`, `acc_ldr`, and `acc_pp` accommodation probabilities lead to capacity lower bounds
 based on an inverse Poisson approach. You can also directly specify `cap_obs`, `cap_ldr`,
 and `cap_pp` capacity levels.
 
@@ -85,8 +83,8 @@ Generate simulation config file for each scenario
 
 The ``create_configs.py`` module does two main things:
 
-* create a config file for each simulation scenario
-* generate shell scripts for running the simulation scenarios
+* creates a config file for each simulation scenario
+* generates shell scripts for running the simulation scenarios
 
 .. code::
 
@@ -106,7 +104,7 @@ For example,
 Generate shell scripts to run the simulation scenarios
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-As mentioned in the previous step ``create_configs.py`` creates the
+As mentioned in the previous step, ``create_configs.py`` creates the
 shell scripts containing the commands to run the simulation scenarios. 
 In order to take advantage of multiple CPUs, we can specify a 
 ``run_script_chunk_size`` parameter to break up the runs into multiple
@@ -166,7 +164,7 @@ The main steps in fitting metamodels are:
 
 * Generate the X and y matrix data files from the simulation input output summary file. (mm_dataprep.py)
 * Run the metamodel fits for OBS, LDR and PP (mm_run_fits_{unit}.py)
-    - still need to add a CLI to these
+    - still need to add a CLI to these (added on 2022-02-25)
     - output includes metrics summary csv, actual vs predicted plots and coefficient plots
 * Further output analysis (ongoing work)
 

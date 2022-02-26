@@ -62,8 +62,8 @@ def create_x_y(exp, sim_input_output_qnq_path, scenarios, output_path):
     # LDR can have LOS shortened by patients blocked in OBS and have LOS lengthened
     # by patients blocked in LDR by PP
     X_ldr_q_cols = X_ldr_basicq_cols.copy()
-    X_ldr_q_cols.extend(['prob_blockedby_pp_approx', 'condmeantime_blockedby_pp_approx',
-                         'prob_blockedby_ldr_approx', 'condmeantime_blockedby_ldr_approx',
+    X_ldr_q_cols.extend(['probblockedbypp_approx', 'condmeantimeblockedbypp_approx',
+                         'probblockedbyldr_approx', 'condmeantimeblockedbyldr_approx',
                          'pp_cv2_svctime',
                          'ldr_eff_load', 'ldr_eff_sqrtload', 'ldr_effmean_svctime_approx'])
 
@@ -73,20 +73,20 @@ def create_x_y(exp, sim_input_output_qnq_path, scenarios, output_path):
 
     X_ldr_occmean_onlyq_cols = ['ldr_eff_load']
     X_ldr_occp95_onlyq_cols = ['ldr_eff_load', 'ldr_eff_sqrtload']
-    X_ldr_probblockedbypp_onlyq_cols = ['prob_blockedby_pp_approx']
-    X_ldr_condmeantimeblockedbypp_onlyq_cols = ['condmeantime_blockedby_pp_approx']
+    X_ldr_probblockedbypp_onlyq_cols = ['probblockedbypp_approx']
+    X_ldr_condmeantimeblockedbypp_onlyq_cols = ['condmeantimeblockedbypp_approx']
 
     X_obs_occmean_onlyq_cols = ['obs_eff_load']
     X_obs_occp95_onlyq_cols = ['obs_eff_load', 'obs_eff_sqrtload']
-    X_obs_probblockedbyldr_onlyq_cols = ['prob_blockedby_ldr_approx']
-    X_obs_condmeantimeblockedbyldr_onlyq_cols = ['condmeantime_blockedby_ldr_approx']
+    X_obs_probblockedbyldr_onlyq_cols = ['probblockedbyldr_approx']
+    X_obs_condmeantimeblockedbyldr_onlyq_cols = ['condmeantimeblockedbyldr_approx']
 
 
     # OBS time in system impacted by
     # congestion in the downstream units.
     X_obs_q_cols = X_obs_basicq_cols.copy()
-    X_obs_q_cols.extend(['prob_blockedby_pp_approx', 'condmeantime_blockedby_pp_approx',
-                         'prob_blockedby_ldr_approx', 'condmeantime_blockedby_ldr_approx',
+    X_obs_q_cols.extend(['probblockedbypp_approx', 'condmeantimeblockedbypp_approx',
+                         'probblockedbyldr_approx', 'condmeantimeblockedbyldr_approx',
                          'ldr_cv2_svctime',
                          'obs_eff_load', 'obs_eff_sqrtload', 'ldr_effmean_svctime_approx'])
 
@@ -315,11 +315,11 @@ if __name__ == '__main__':
     override_args = True
 
     if override_args:
-        exp = "exp13"
+        exp = "exp11"
         #siminout_path = Path("input", "exp13", f"scenario_siminout_{exp}.csv")
         siminout_qng_path = Path("../output", exp, f"scenario_siminout_{exp}.csv")
         output_data_path = Path(f"input/{exp}")
-        scenarios = slice(1, 3240)
+        scenarios = slice(1, 135)
     else:
         mm_args = process_command_line()
         exp = mm_args.experiment
