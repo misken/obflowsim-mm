@@ -64,20 +64,20 @@ def create_x_y(exp, sim_input_output_qnq_path, scenarios, output_path):
     X_ldr_q_cols = X_ldr_basicq_cols.copy()
     X_ldr_q_cols.extend(['probblockedbypp_approx', 'condmeantimeblockedbypp_approx',
                          'probblockedbyldr_approx', 'condmeantimeblockedbyldr_approx',
-                         'pp_cv2_svctime',
-                         'ldr_eff_load', 'ldr_eff_sqrtload', 'ldr_effmean_svctime_approx'])
+                         'cv2_svctime_pp',
+                         'eff_load_ldr', 'eff_sqrtload_ldr', 'effmean_svctime_ldr_approx'])
 
     # The onlyq versions can be used to test models based on minimal set of q'ng related variables
     X_pp_occmean_onlyq_cols = ['load_pp']
     X_pp_occp95_onlyq_cols = ['load_pp']
 
-    X_ldr_occmean_onlyq_cols = ['ldr_eff_load']
-    X_ldr_occp95_onlyq_cols = ['ldr_eff_load', 'ldr_eff_sqrtload']
+    X_ldr_occmean_onlyq_cols = ['eff_load_ldr']
+    X_ldr_occp95_onlyq_cols = ['eff_load_ldr', 'eff_sqrtload_ldr']
     X_ldr_probblockedbypp_onlyq_cols = ['probblockedbypp_approx']
     X_ldr_condmeantimeblockedbypp_onlyq_cols = ['condmeantimeblockedbypp_approx']
 
-    X_obs_occmean_onlyq_cols = ['obs_eff_load']
-    X_obs_occp95_onlyq_cols = ['obs_eff_load', 'obs_eff_sqrtload']
+    X_obs_occmean_onlyq_cols = ['eff_load_obs']
+    X_obs_occp95_onlyq_cols = ['eff_load_obs', 'eff_sqrtload_obs']
     X_obs_probblockedbyldr_onlyq_cols = ['probblockedbyldr_approx']
     X_obs_condmeantimeblockedbyldr_onlyq_cols = ['condmeantimeblockedbyldr_approx']
 
@@ -87,8 +87,7 @@ def create_x_y(exp, sim_input_output_qnq_path, scenarios, output_path):
     X_obs_q_cols = X_obs_basicq_cols.copy()
     X_obs_q_cols.extend(['probblockedbypp_approx', 'condmeantimeblockedbypp_approx',
                          'probblockedbyldr_approx', 'condmeantimeblockedbyldr_approx',
-                         'ldr_cv2_svctime',
-                         'obs_eff_load', 'obs_eff_sqrtload', 'ldr_effmean_svctime_approx'])
+                         'eff_load_obs', 'eff_sqrtload_obs', 'cv2_svctime_obs', 'effmean_svctime_ldr_approx'])
 
     # Create dataframes based on the column specs above
     X_pp_noq = xy_df.loc[scenarios, X_pp_noq_cols]
@@ -97,7 +96,7 @@ def create_x_y(exp, sim_input_output_qnq_path, scenarios, output_path):
 
     # PP
     X_pp_basicq = xy_df.loc[scenarios, X_pp_basicq_cols]
-    X_pp_basicq['sqrt_load_pp'] = X_pp_basicq['load_pp'] ** 0.5
+    # X_pp_basicq['sqrt_load_pp'] = X_pp_basicq['load_pp'] ** 0.5
 
     X_pp_occmean_onlyq = xy_df.loc[scenarios, X_pp_occmean_onlyq_cols]
     X_pp_occp95_onlyq = xy_df.loc[scenarios, X_pp_occp95_onlyq_cols]
@@ -110,9 +109,9 @@ def create_x_y(exp, sim_input_output_qnq_path, scenarios, output_path):
     X_ldr_basicq['sqrt_load_pp'] = X_ldr_basicq['load_pp'] ** 0.5
 
     X_ldr_q = xy_df.loc[scenarios, X_ldr_q_cols]
-    X_ldr_q['sqrt_load_obs'] = X_ldr_q['load_obs'] ** 0.5
-    X_ldr_q['sqrt_load_ldr'] = X_ldr_q['load_ldr'] ** 0.5
-    X_ldr_q['sqrt_load_pp'] = X_ldr_q['load_pp'] ** 0.5
+    # X_ldr_q['sqrt_load_obs'] = X_ldr_q['load_obs'] ** 0.5
+    # X_ldr_q['sqrt_load_ldr'] = X_ldr_q['load_ldr'] ** 0.5
+    # X_ldr_q['sqrt_load_pp'] = X_ldr_q['load_pp'] ** 0.5
 
     X_ldr_occmean_onlyq = xy_df.loc[scenarios, X_ldr_occmean_onlyq_cols]
     X_ldr_occp95_onlyq = xy_df.loc[scenarios, X_ldr_occp95_onlyq_cols]
@@ -121,14 +120,14 @@ def create_x_y(exp, sim_input_output_qnq_path, scenarios, output_path):
 
     # OBS
     X_obs_basicq = xy_df.loc[scenarios, X_obs_basicq_cols]
-    X_obs_basicq['sqrt_load_obs'] = X_obs_basicq['load_obs'] ** 0.5
-    X_obs_basicq['sqrt_load_ldr'] = X_obs_basicq['load_ldr'] ** 0.5
-    X_obs_basicq['sqrt_load_pp'] = X_obs_basicq['load_pp'] ** 0.5
+    # X_obs_basicq['sqrt_load_obs'] = X_obs_basicq['load_obs'] ** 0.5
+    # X_obs_basicq['sqrt_load_ldr'] = X_obs_basicq['load_ldr'] ** 0.5
+    # X_obs_basicq['sqrt_load_pp'] = X_obs_basicq['load_pp'] ** 0.5
 
     X_obs_q = xy_df.loc[scenarios, X_obs_q_cols]
-    X_obs_q['sqrt_load_obs'] = X_obs_q['load_obs'] ** 0.5
-    X_obs_q['sqrt_load_ldr'] = X_obs_q['load_ldr'] ** 0.5
-    X_obs_q['sqrt_load_pp'] = X_obs_q['load_pp'] ** 0.5
+    # X_obs_q['sqrt_load_obs'] = X_obs_q['load_obs'] ** 0.5
+    # X_obs_q['sqrt_load_ldr'] = X_obs_q['load_ldr'] ** 0.5
+    # X_obs_q['sqrt_load_pp'] = X_obs_q['load_pp'] ** 0.5
 
     X_obs_occmean_onlyq = xy_df.loc[scenarios, X_obs_occmean_onlyq_cols]
     X_obs_occp95_onlyq = xy_df.loc[scenarios, X_obs_occp95_onlyq_cols]
@@ -210,6 +209,10 @@ def qng_approx_from_inputs(scenario_inputs_summary):
         load_obs = arr_rate * obs_mean_svctime
         load_ldr = arr_rate * ldr_mean_svctime
         load_pp = arr_rate * pp_mean_svctime
+
+        sqrt_load_obs = load_obs ** 0.5
+        sqrt_load_ldr = load_ldr ** 0.5
+        sqrt_load_pp = load_pp ** 0.5
         
         rho_obs = load_obs / obs_cap
         rho_ldr = load_ldr / ldr_cap
@@ -224,36 +227,41 @@ def qng_approx_from_inputs(scenario_inputs_summary):
                                                       pp_mean_svctime, pp_cv2_svctime, pp_cap)
 
         obs_effmean_svctime = obs_mean_svctime + obs_probblockedbyldr * obs_condmeantime_blockedby_ldr
-        obs_eff_load = arr_rate * obs_effmean_svctime
-        obs_eff_sqrtload = obs_eff_load ** 0.5
-        obs_eff_rho = obs_eff_load / obs_cap
+        eff_load_obs = arr_rate * obs_effmean_svctime
+        eff_sqrtload_obs = eff_load_obs ** 0.5
+        eff_rho_obs = eff_load_obs / obs_cap
 
-        ldr_eff_load = arr_rate * ldr_effmean_svctime
-        ldr_eff_sqrtload = ldr_eff_load ** 0.5
-        ldr_eff_rho = ldr_eff_load / ldr_cap
+        eff_load_ldr = arr_rate * ldr_effmean_svctime
+        eff_sqrtload_ldr = eff_load_ldr ** 0.5
+        eff_rho_ldr = eff_load_ldr / ldr_cap
 
         scen_results = {'scenario': scenario,
                         'mean_los_pp': pp_mean_svctime,
                         'load_obs': load_obs,
                         'load_ldr': load_ldr,
                         'load_pp': load_pp,
+
+                        'sqrt_load_obs': sqrt_load_obs,
+                        'sqrt_load_ldr': sqrt_load_ldr,
+                        'sqrt_load_pp': sqrt_load_pp,
+
                         'rho_obs': rho_obs,
                         'rho_ldr': rho_ldr,
                         'rho_pp': rho_pp,
                         'probblockedbyldr_approx': obs_probblockedbyldr,
                         'condmeantimeblockedbyldr_approx': obs_condmeantime_blockedby_ldr,
-                        'ldr_effmean_svctime_approx': ldr_effmean_svctime,
+                        'effmean_svctime_ldr_approx': ldr_effmean_svctime,
                         'probblockedbypp_approx': ldr_pct_blockedby_pp,
                         'condmeantimeblockedbypp_approx': ldr_meantime_blockedby_pp,
-                        'obs_cv2_svctime': obs_cv2_svctime,
-                        'ldr_cv2_svctime': ldr_cv2_svctime,
-                        'pp_cv2_svctime': pp_cv2_svctime,
-                        'obs_eff_load': obs_eff_load,
-                        'obs_eff_rho': obs_eff_rho,
-                        'obs_eff_sqrtload': obs_eff_sqrtload,
-                        'ldr_eff_load': ldr_eff_load,
-                        'ldr_eff_rho': ldr_eff_rho,
-                        'ldr_eff_sqrtload': ldr_eff_sqrtload}
+                        'cv2_svctime_obs': obs_cv2_svctime,
+                        'cv2_svctime_ldr': ldr_cv2_svctime,
+                        'cv2_svctime_pp': pp_cv2_svctime,
+                        'eff_load_obs': eff_load_obs,
+                        'eff_rho_obs': eff_rho_obs,
+                        'eff_sqrtload_obs': eff_sqrtload_obs,
+                        'eff_load_ldr': eff_load_ldr,
+                        'eff_rho_ldr': eff_rho_ldr,
+                        'eff_sqrtload_ldr': eff_sqrtload_ldr}
 
         results.append(scen_results)
 
@@ -278,12 +286,6 @@ def process_command_line():
         "experiment", type=str,
         help="String used in output filenames"
     )
-
-    parser.add_argument(
-        "siminout_path", type=str,
-        help="Path to csv file containing scenario inputs, summary stats"
-    )
-
 
     parser.add_argument(
         "siminout_qng_path", type=str,
@@ -316,14 +318,12 @@ if __name__ == '__main__':
 
     if override_args:
         exp = "exp11"
-        #siminout_path = Path("input", "exp13", f"scenario_siminout_{exp}.csv")
         siminout_qng_path = Path("../output", exp, f"scenario_siminout_{exp}.csv")
         output_data_path = Path(f"input/{exp}")
         scenarios = slice(1, 135)
     else:
         mm_args = process_command_line()
         exp = mm_args.experiment
-        siminout_path = mm_args.siminout_path
         siminout_qng_path = mm_args.siminout_qng_path
         if (mm_args.scenario_start is not None) and (mm_args.scenario_end is not None):
             scenarios = slice(int(mm_args.scenario_start), int(mm_args.scenario_end))
