@@ -51,10 +51,10 @@ def fit_models(experiment):
     # y vectors
     y_ldr_occmean = pd.read_csv(Path(input_path, f'y_ldr_occmean_{experiment}.csv'), index_col=0, squeeze=True)
     y_ldr_occp95 = pd.read_csv(Path(input_path, f'y_ldr_occp95_{experiment}.csv'), index_col=0, squeeze=True)
-    y_probblockedbypp = \
-        pd.read_csv(Path(input_path, f'y_probblockedbypp_{experiment}.csv'), index_col=0, squeeze=True)
-    y_condmeantimeblockedbypp = \
-        pd.read_csv(Path(input_path, f'y_condmeantimeblockedbypp_{experiment}.csv'), index_col=0, squeeze=True)
+    y_ldr_probblocked = \
+        pd.read_csv(Path(input_path, f'y_ldr_probblocked_{experiment}.csv'), index_col=0, squeeze=True)
+    y_ldr_condmeantimeblocked = \
+        pd.read_csv(Path(input_path, f'y_ldr_condmeantimeblocked_{experiment}.csv'), index_col=0, squeeze=True)
 
     # Fit models
 
@@ -69,13 +69,13 @@ def fit_models(experiment):
 
     probblockedbypp_q_erlangc_results = \
         crossval_summarize_mm('ldr_probblockedbypp_q_erlangc', 'ldr', 'probblockedbypp',
-                              X_ldr_q, y_probblockedbypp,
+                              X_ldr_q, y_ldr_probblocked,
                               scale=False, fit_intercept=True,
                               flavor='erlangc', col_idx_arate=0, col_idx_meansvctime=5, col_idx_numservers=7)
 
     condmeantimeblockedbypp_q_mgc_results = \
         crossval_summarize_mm('ldr_condmeantimeblockedbypp_q_mgc', 'ldr', 'condmeantimeblockedbypp',
-                              X_ldr_q, y_condmeantimeblockedbypp,
+                              X_ldr_q, y_ldr_condmeantimeblocked,
                               scale=False, fit_intercept=True,
                               flavor='condmeanwaitldr', col_idx_arate=0, col_idx_meansvctime=5, col_idx_numservers=7,
                               col_idx_cv2svctime=18)
@@ -91,11 +91,11 @@ def fit_models(experiment):
 
     probblockedbypp_onlyq_lm_results = \
         crossval_summarize_mm('ldr_probblockedbypp_onlyq_lm', 'ldr', 'probblockedbypp',
-                              X_ldr_probblockedbypp_onlyq, y_probblockedbypp, scale=False, flavor='lm')
+                              X_ldr_probblockedbypp_onlyq, y_ldr_probblocked, scale=False, flavor='lm')
 
     condmeantimeblockedbypp_onlyq_lm_results = \
         crossval_summarize_mm('ldr_condmeantimeblockedbypp_onlyq_lm', 'ldr', 'condmeantimeblockedbypp',
-                              X_ldr_condmeantimeblockedbypp_onlyq, y_condmeantimeblockedbypp, scale=False, flavor='lm')
+                              X_ldr_condmeantimeblockedbypp_onlyq, y_ldr_condmeantimeblocked, scale=False, flavor='lm')
 
     # Linear regression (lm)
     ldr_occmean_basicq_lm_results = \
@@ -122,32 +122,32 @@ def fit_models(experiment):
 
     probblockedbypp_basicq_lm_results = \
         crossval_summarize_mm('ldr_probblockedbypp_basicq_lm', 'ldr', 'probblockedbypp',
-                              X_ldr_basicq, y_probblockedbypp,
+                              X_ldr_basicq, y_ldr_probblocked,
                               scale=False, fit_intercept=True, flavor='lm')
 
     probblockedbypp_q_lm_results = \
         crossval_summarize_mm('ldr_probblockedbypp_q_lm', 'ldr', 'probblockedbypp',
-                              X_ldr_q, y_probblockedbypp,
+                              X_ldr_q, y_ldr_probblocked,
                               scale=False, fit_intercept=True, flavor='lm')
 
     probblockedbypp_noq_lm_results = \
         crossval_summarize_mm('ldr_probblockedbypp_noq_lm', 'ldr', 'probblockedbypp',
-                              X_ldr_noq, y_probblockedbypp,
+                              X_ldr_noq, y_ldr_probblocked,
                               scale=False, fit_intercept=True, flavor='lm')
 
     condmeantimeblockedbypp_basicq_lm_results = \
         crossval_summarize_mm('ldr_condmeantimeblockedbypp_basicq_lm', 'ldr', 'condmeantimeblockedbypp',
-                              X_ldr_basicq, y_condmeantimeblockedbypp,
+                              X_ldr_basicq, y_ldr_condmeantimeblocked,
                               scale=False, fit_intercept=True, flavor='lm')
 
     condmeantimeblockedbypp_q_lm_results = \
         crossval_summarize_mm('ldr_condmeantimeblockedbypp_q_lm', 'ldr', 'condmeantimeblockedbypp',
-                              X_ldr_q, y_condmeantimeblockedbypp,
+                              X_ldr_q, y_ldr_condmeantimeblocked,
                               scale=False, fit_intercept=True, flavor='lm')
 
     condmeantimeblockedbypp_noq_lm_results = \
         crossval_summarize_mm('ldr_condmeantimeblockedbypp_noq_lm', 'ldr', 'condmeantimeblockedbypp',
-                              X_ldr_noq, y_condmeantimeblockedbypp,
+                              X_ldr_noq, y_ldr_condmeantimeblocked,
                               scale=False, fit_intercept=True, flavor='lm')
 
     # LassoCV (lassocv)
@@ -177,32 +177,32 @@ def fit_models(experiment):
 
     probblockedbypp_basicq_lassocv_results = \
         crossval_summarize_mm('ldr_probblockedbypp_basicq_lassocv', 'ldr', 'probblockedbypp',
-                              X_ldr_basicq, y_probblockedbypp,
+                              X_ldr_basicq, y_ldr_probblocked,
                               scale=True, flavor='lassocv', lasso_max_iter=3000)
 
     probblockedbypp_q_lassocv_results = \
         crossval_summarize_mm('ldr_probblockedbypp_q_lassocv', 'ldr', 'probblockedbypp',
-                              X_ldr_q, y_probblockedbypp,
+                              X_ldr_q, y_ldr_probblocked,
                               scale=True, flavor='lassocv', lasso_max_iter=3000)
 
     probblockedbypp_noq_lassocv_results = \
         crossval_summarize_mm('ldr_probblockedbypp_noq_lassocv', 'ldr', 'probblockedbypp',
-                              X_ldr_noq, y_probblockedbypp,
+                              X_ldr_noq, y_ldr_probblocked,
                               scale=True, flavor='lassocv', lasso_max_iter=3000)
 
     condmeantimeblockedbypp_basicq_lassocv_results = \
         crossval_summarize_mm('ldr_condmeantimeblockedbypp_basicq_lassocv', 'ldr', 'condmeantimeblockedbypp',
-                              X_ldr_basicq, y_condmeantimeblockedbypp,
+                              X_ldr_basicq, y_ldr_condmeantimeblocked,
                               scale=True, flavor='lassocv', lasso_max_iter=3000)
 
     condmeantimeblockedbypp_q_lassocv_results = \
         crossval_summarize_mm('ldr_condmeantimeblockedbypp_q_lassocv', 'ldr', 'condmeantimeblockedbypp',
-                              X_ldr_q, y_condmeantimeblockedbypp,
+                              X_ldr_q, y_ldr_condmeantimeblocked,
                               scale=True, flavor='lassocv', lasso_max_iter=3000)
 
     condmeantimeblockedbypp_noq_lassocv_results = \
         crossval_summarize_mm('ldr_condmeantimeblockedbypp_noq_lassocv', 'ldr', 'condmeantimeblockedbypp',
-                              X_ldr_noq, y_condmeantimeblockedbypp,
+                              X_ldr_noq, y_ldr_condmeantimeblocked,
                               scale=True, flavor='lassocv', lasso_max_iter=3000)
 
     # Polynomial regression (poly)
@@ -233,32 +233,32 @@ def fit_models(experiment):
 
     probblockedbypp_basicq_poly_results = \
         crossval_summarize_mm('ldr_probblockedbypp_basicq_poly', 'ldr', 'probblockedbypp',
-                              X_ldr_basicq, y_probblockedbypp,
+                              X_ldr_basicq, y_ldr_probblocked,
                               scale=False, flavor='poly')
 
     probblockedbypp_q_poly_results = \
         crossval_summarize_mm('ldr_probblockedbypp_q_poly', 'ldr', 'probblockedbypp',
-                              X_ldr_q, y_probblockedbypp,
+                              X_ldr_q, y_ldr_probblocked,
                               scale=False, flavor='poly')
 
     probblockedbypp_noq_poly_results = \
         crossval_summarize_mm('ldr_probblockedbypp_noq_poly', 'ldr', 'probblockedbypp',
-                              X_ldr_noq, y_probblockedbypp,
+                              X_ldr_noq, y_ldr_probblocked,
                               scale=False, flavor='poly')
 
     condmeantimeblockedbypp_basicq_poly_results = \
         crossval_summarize_mm('ldr_condmeantimeblockedbypp_basicq_poly', 'ldr', 'condmeantimeblockedbypp',
-                              X_ldr_basicq, y_condmeantimeblockedbypp,
+                              X_ldr_basicq, y_ldr_condmeantimeblocked,
                               scale=False, flavor='poly')
 
     condmeantimeblockedbypp_q_poly_results = \
         crossval_summarize_mm('ldr_condmeantimeblockedbypp_q_poly', 'ldr', 'condmeantimeblockedbypp',
-                              X_ldr_q, y_condmeantimeblockedbypp,
+                              X_ldr_q, y_ldr_condmeantimeblocked,
                               scale=False, flavor='poly')
 
     condmeantimeblockedbypp_noq_poly_results = \
         crossval_summarize_mm('ldr_condmeantimeblockedbypp_noq_poly', 'ldr', 'condmeantimeblockedbypp',
-                              X_ldr_noq, y_condmeantimeblockedbypp,
+                              X_ldr_noq, y_ldr_condmeantimeblocked,
                               scale=False, flavor='poly')
 
     # Random forest (rf)
@@ -288,32 +288,32 @@ def fit_models(experiment):
 
     probblockedbypp_basicq_rf_results = \
         crossval_summarize_mm('ldr_probblockedbypp_q_rf', 'ldr', 'probblockedbypp',
-                              X_ldr_basicq, y_probblockedbypp,
+                              X_ldr_basicq, y_ldr_probblocked,
                               scale=False, flavor='rf')
 
     probblockedbypp_q_rf_results = \
         crossval_summarize_mm('ldr_probblockedbypp_q_rf', 'ldr', 'probblockedbypp',
-                              X_ldr_q, y_probblockedbypp,
+                              X_ldr_q, y_ldr_probblocked,
                               scale=False, flavor='rf')
 
     probblockedbypp_noq_rf_results = \
         crossval_summarize_mm('ldr_probblockedbypp_noq_rf', 'ldr', 'probblockedbypp',
-                              X_ldr_noq, y_probblockedbypp,
+                              X_ldr_noq, y_ldr_probblocked,
                               scale=False, flavor='rf')
 
     condmeantimeblockedbypp_basicq_rf_results = \
         crossval_summarize_mm('ldr_condmeantimeblockedbypp_basicq_rf', 'ldr', 'condmeantimeblockedbypp',
-                              X_ldr_basicq, y_condmeantimeblockedbypp,
+                              X_ldr_basicq, y_ldr_condmeantimeblocked,
                               scale=False, flavor='rf')
 
     condmeantimeblockedbypp_q_rf_results = \
         crossval_summarize_mm('ldr_condmeantimeblockedbypp_q_rf', 'ldr', 'condmeantimeblockedbypp',
-                              X_ldr_q, y_condmeantimeblockedbypp,
+                              X_ldr_q, y_ldr_condmeantimeblocked,
                               scale=False, flavor='rf')
 
     condmeantimeblockedbypp_noq_rf_results = \
         crossval_summarize_mm('ldr_condmeantimeblockedbypp_noq_rf', 'ldr', 'condmeantimeblockedbypp',
-                              X_ldr_noq, y_condmeantimeblockedbypp,
+                              X_ldr_noq, y_ldr_condmeantimeblocked,
                               scale=False, flavor='rf')
 
     # Support vector regression (svr)
@@ -343,32 +343,32 @@ def fit_models(experiment):
 
     probblockedbypp_basicq_svr_results = \
         crossval_summarize_mm('ldr_probblockedbypp_basicq_svr', 'ldr', 'probblockedbypp',
-                              X_ldr_basicq, y_probblockedbypp,
+                              X_ldr_basicq, y_ldr_probblocked,
                               scale=True, flavor='svr')
 
     probblockedbypp_q_svr_results = \
         crossval_summarize_mm('ldr_probblockedbypp_q_svr', 'ldr', 'probblockedbypp',
-                              X_ldr_q, y_probblockedbypp,
+                              X_ldr_q, y_ldr_probblocked,
                               scale=True, flavor='svr')
 
     probblockedbypp_noq_svr_results = \
         crossval_summarize_mm('ldr_probblockedbypp_noq_svr', 'ldr', 'probblockedbypp',
-                              X_ldr_noq, y_probblockedbypp,
+                              X_ldr_noq, y_ldr_probblocked,
                               scale=True, flavor='svr')
 
     condmeantimeblockedbypp_basicq_svr_results = \
         crossval_summarize_mm('ldr_condmeantimeblockedbypp_basicq_svr', 'ldr', 'condmeantimeblockedbypp',
-                              X_ldr_basicq, y_condmeantimeblockedbypp,
+                              X_ldr_basicq, y_ldr_condmeantimeblocked,
                               scale=True, flavor='svr')
 
     condmeantimeblockedbypp_q_svr_results = \
         crossval_summarize_mm('ldr_condmeantimeblockedbypp_q_svr', 'ldr', 'condmeantime_blockedbyldr',
-                              X_ldr_q, y_condmeantimeblockedbypp,
+                              X_ldr_q, y_ldr_condmeantimeblocked,
                               scale=True, flavor='svr')
 
     condmeantimeblockedbypp_noq_svr_results = \
         crossval_summarize_mm('ldr_condmeantimeblockedbypp_noq_svr', 'ldr', 'condmeantimeblockedbypp',
-                              X_ldr_noq, y_condmeantimeblockedbypp,
+                              X_ldr_noq, y_ldr_condmeantimeblocked,
                               scale=True, flavor='svr')
 
     # MLPRegressor Neural net (nn)
@@ -397,32 +397,32 @@ def fit_models(experiment):
 
     probblockedbypp_basicq_nn_results = \
         crossval_summarize_mm('ldr_probblockedbypp_basicq_nn', 'ldr', 'probblockedbypp',
-                              X_ldr_basicq, y_probblockedbypp,
+                              X_ldr_basicq, y_ldr_probblocked,
                               scale=True, flavor='nn')
 
     probblockedbypp_q_nn_results = \
         crossval_summarize_mm('ldr_probblockedbypp_q_nn', 'ldr', 'probblockedbypp',
-                              X_ldr_q, y_probblockedbypp,
+                              X_ldr_q, y_ldr_probblocked,
                               scale=True, flavor='nn')
 
     probblockedbypp_noq_nn_results = \
         crossval_summarize_mm('ldr_probblockedbypp_noq_nn', 'ldr', 'probblockedbypp',
-                              X_ldr_noq, y_probblockedbypp,
+                              X_ldr_noq, y_ldr_probblocked,
                               scale=True, flavor='nn')
 
     condmeantimeblockedbypp_basicq_nn_results = \
         crossval_summarize_mm('ldr_condmeantimeblockedbypp_basicq_nn', 'ldr', 'condmeantimeblockedbypp',
-                              X_ldr_basicq, y_condmeantimeblockedbypp,
+                              X_ldr_basicq, y_ldr_condmeantimeblocked,
                               scale=True, flavor='nn')
 
     condmeantimeblockedbypp_q_nn_results = \
         crossval_summarize_mm('ldr_condmeantimeblockedbypp_q_nn', 'ldr', 'condmeantimeblockedbypp',
-                              X_ldr_q, y_condmeantimeblockedbypp,
+                              X_ldr_q, y_ldr_condmeantimeblocked,
                               scale=True, flavor='nn')
 
     condmeantimeblockedbypp_noq_nn_results = \
         crossval_summarize_mm('ldr_condmeantimeblockedbypp_noq_nn', 'ldr', 'condmeantimeblockedbypp',
-                              X_ldr_noq, y_condmeantimeblockedbypp,
+                              X_ldr_noq, y_ldr_condmeantimeblocked,
                               scale=True, flavor='nn')
 
     ldr_results = {'ldr_occmean_basicq_lm_results': ldr_occmean_basicq_lm_results,

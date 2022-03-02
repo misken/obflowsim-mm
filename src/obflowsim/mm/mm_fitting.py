@@ -224,6 +224,7 @@ def crossval_summarize_mm(unit_pm_qdata_model, unit, measure, X, y, flavor='lm',
         # Create coefficient plot
         fig_coeffs = coeffs_by_fold(unscaled_coeffs_df, col_wrap=5, sharey=False)
 
+        # Create results dictionary
         results = {'unit_pm_qdata_model': unit_pm_qdata_model,
                    'measure': measure,
                    'flavor': flavor,
