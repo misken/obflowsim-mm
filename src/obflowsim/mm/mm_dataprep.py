@@ -152,7 +152,7 @@ def create_x_y(exp, sim_input_output_qnq_path, scenarios, output_path):
     X_obs_q.to_csv(Path(output_path, f'X_obs_q_{exp}.csv'))
     X_obs_occmean_onlyq.to_csv(Path(output_path, f'X_obs_occmean_onlyq_{exp}.csv'))
     X_obs_occp95_onlyq.to_csv(Path(output_path, f'X_obs_occp95_onlyq_{exp}.csv'))
-    X_obs_probblocked_onlyq.to_csv(Path(output_path, f'X_obs_probblockedb_onlyq_{exp}.csv'))
+    X_obs_probblocked_onlyq.to_csv(Path(output_path, f'X_obs_probblocked_onlyq_{exp}.csv'))
     X_obs_condmeantimeblocked_onlyq.to_csv(Path(output_path, f'X_obs_condmeantimeblocked_onlyq_{exp}.csv'))
 
     y_pp_occmean.to_csv(Path(output_path, f'y_pp_occmean_{exp}.csv'))
@@ -165,7 +165,7 @@ def create_x_y(exp, sim_input_output_qnq_path, scenarios, output_path):
     y_ldr_probblocked.to_csv(Path(output_path, f'y_ldr_probblocked_{exp}.csv'))
     y_obs_probblocked.to_csv(Path(output_path, f'y_obs_probblocked_{exp}.csv'))
     y_obs_condmeantimeblocked.to_csv(Path(output_path, f'y_obs_condmeantimeblocked_{exp}.csv'))
-    y_ldr_condmeantimeblocked.to_csv(Path(output_path, f'y_obs_condmeantimeblocked_{exp}.csv'))
+    y_ldr_condmeantimeblocked.to_csv(Path(output_path, f'y_ldr_condmeantimeblocked_{exp}.csv'))
 
 
 def qng_approx_from_inputs(scenario_inputs_summary):
