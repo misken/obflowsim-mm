@@ -2,6 +2,7 @@ from pathlib import Path
 import pickle
 import argparse
 
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -24,6 +25,31 @@ def create_coeff_plots(experiment, unit, results_dict, figures_path):
             scatter_plot = results_dict[key]['coefplot']
             plot_name = f"{experiment}_{unit}_{unit_pm_qdata_model}_cv_coeff.png"
             scatter_plot.savefig(Path(figures_path, plot_name))
+
+
+def create_predictions_df(results_dict):
+    dfs = []
+    for key in results_dict.keys():
+        print(f"results df: {key}")
+        unit_pm_qdata_model = results_dict[key]['unit_pm_qdata_model']
+
+        predictions_df = pd.DataFrame()
+        num_scenarios = len(results_dict[key]['predictions'])
+        predictions_df['scenario'] = np.arange(1, num_scenarios + 1)
+        predictions_df['prediction'] = results_dict[key]['predictions']
+        resids = results_dict[key]['residuals'].to_numpy()
+        predictions_df['actual'] = results_dict[key]['predictions'] - resids
+        predictions_df['unit_pm_qdata_model'] = unit_pm_qdata_model
+        predictions_df['unit'] = results_dict[key]['unit']
+        predictions_df['measure'] = results_dict[key]['measure']
+        predictions_df['qdata'] = results_dict[key]['qdata']
+        predictions_df['model'] = results_dict[key]['flavor']
+
+        dfs.append(predictions_df)
+
+    consolidated_predictions_df = pd.concat(dfs)
+    consolidated_predictions_df.reset_index(inplace=True)
+    return consolidated_predictions_df
 
 
 def create_metrics_df(results_dict):
@@ -76,12 +102,12 @@ def process_command_line():
     )
 
     parser.add_argument(
-        "output_path", type=str,
+        "--output_path", type=str, default=None,
         help="Directory to write summaries"
     )
 
     parser.add_argument(
-        "figures_path", type=str,
+        "--figures_path", type=str, default=None,
         help="Directory to write figures"
     )
 
@@ -96,11 +122,11 @@ if __name__ == '__main__':
 
     if override_args:
         experiment = "exp13"
-        unit = "pp"
+        unit = "ldr"
         output_path = f"output/{experiment}"
         pickle_path_filename = Path(output_path, f"{experiment}_{unit}_results.pkl")
-
-        figures_path = f"output/{experiment}/figures"
+        #figures_path = f"output/{experiment}/figures"
+        figures_path = None
     else:
         pfm_args = process_command_line()
         experiment = pfm_args.experiment
@@ -113,11 +139,17 @@ if __name__ == '__main__':
 
     with open(pickle_path_filename, 'rb') as pickle_file:
         results_dict = pickle.load(pickle_file)
+
+    if figures_path is not None:
         create_cv_plots(experiment, unit, results_dict, Path(figures_path))
         create_coeff_plots(experiment, unit, results_dict, Path(figures_path))
 
+    if output_path is not None:
         metrics_df = create_metrics_df(results_dict)
         metrics_df.to_csv(Path(output_path, f"{experiment}_{unit}_metrics.csv"), index=False)
+
+        predictions_df = create_predictions_df(results_dict)
+        predictions_df.to_csv(Path(output_path, f"{experiment}_{unit}_predictions.csv"), index=False)
 
 
 

@@ -6,7 +6,8 @@ import pickle
 import pandas as pd
 
 from obflowsim.mm.mm_fitting import crossval_summarize_mm
-from obflowsim.mm.mm_process_fitted_models import create_cv_plots, create_coeff_plots, create_metrics_df
+from obflowsim.mm.mm_process_fitted_models import create_cv_plots, create_coeff_plots
+from obflowsim.mm.mm_process_fitted_models import create_metrics_df, create_predictions_df
 
 UNIT = "pp"
 
@@ -199,6 +200,8 @@ def fit_models(experiment):
     metrics_df = create_metrics_df(pp_results)
     metrics_df.to_csv(metrics_path_filename, index=False)
 
+    predictions_df = create_predictions_df(pp_results)
+    predictions_df.to_csv(Path(output_path, f"{experiment}_{unit}_predictions.csv"), index=False)
 
     sys.setrecursionlimit(10000)
     # Pickle the results
