@@ -64,13 +64,14 @@ def fit_models(experiment):
         crossval_summarize_mm('obs_occp95_q_sqrtload', 'obs', 'occp95', X_obs_q, y_obs_occp95, scale=False,
                               flavor='sqrtload', col_idx_arate=0, col_idx_meansvctime=1, load_pctile=0.95)
 
-    obs_occmean_q_effload_results = \
-        crossval_summarize_mm('obs_occmean_q_effload', 'obs', 'occmean', X_obs_q, y_obs_occmean, scale=False,
-                              flavor='load', col_idx_arate=0, col_idx_meansvctime=19)
-
-    obs_occp95_q_sqrteffload_results = \
-        crossval_summarize_mm('obs_occp95_q_sqrteffload', 'obs', 'occp95', X_obs_q, y_obs_occp95, scale=False,
-                              flavor='sqrtload', col_idx_arate=0, col_idx_meansvctime=19, load_pctile=0.95)
+# TODO The following need eff mean svc time in OBS
+    # obs_occmean_q_effload_results = \
+    #     crossval_summarize_mm('obs_occmean_q_effload', 'obs', 'occmean', X_obs_q, y_obs_occmean, scale=False,
+    #                           flavor='load', col_idx_arate=0, col_idx_meansvctime=19)
+    #
+    # obs_occp95_q_sqrteffload_results = \
+    #     crossval_summarize_mm('obs_occp95_q_sqrteffload', 'obs', 'occp95', X_obs_q, y_obs_occp95, scale=False,
+    #                           flavor='sqrtload', col_idx_arate=0, col_idx_meansvctime=19, load_pctile=0.95)
 
     probblocked_q_erlangc_results = \
         crossval_summarize_mm('obs_probblocked_q_erlangc', 'obs', 'probblocked',
@@ -99,7 +100,7 @@ def fit_models(experiment):
                               X_obs_probblocked_onlyq, y_obs_probblocked, scale=False, flavor='lm')
 
     condmeantimeblocked_onlyq_lm_results = \
-        crossval_summarize_mm('obs_condmeantimeblocked_onlyq_lm', 'ldr', 'condmeantimeblocked',
+        crossval_summarize_mm('obs_condmeantimeblocked_onlyq_lm', 'obs', 'condmeantimeblocked',
                               X_obs_condmeantimeblocked_onlyq, y_obs_condmeantimeblocked, scale=False, flavor='lm')
 
     ## Linear regression (lm)
@@ -581,7 +582,7 @@ def process_command_line(argv=None):
     """
 
     # Create the parser
-    parser = argparse.ArgumentParser(prog='mm_run_fits_ldr',
+    parser = argparse.ArgumentParser(prog='mm_run_fits_obs',
                                      description='Fit metamodels for LDR')
 
     # Add arguments

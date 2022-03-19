@@ -17,12 +17,12 @@ def create_siminout_qng(siminout_path, siminout_qng_path):
     scenario_siminout_qng_df.to_csv(siminout_qng_path, index=False)
 
 
-def create_x_y(exp, sim_input_output_qnq_path, scenarios, output_path):
+def create_x_y(exp, sim_input_output_qnq_path, output_path):
     """
     Read main data file created by simulation output processing and create X and y dataframes.
     Parameters
     ----------
-    scenarios
+
     exp
     sim_input_output_qnq_path
     output_path
@@ -90,48 +90,48 @@ def create_x_y(exp, sim_input_output_qnq_path, scenarios, output_path):
                          'eff_load_obs', 'eff_sqrtload_obs', 'cv2_svctime_obs', 'effmean_svctime_ldr_approx'])
 
     # Create dataframes based on the column specs above
-    X_pp_noq = xy_df.loc[scenarios, X_pp_noq_cols]
-    X_ldr_noq = xy_df.loc[scenarios, X_ldr_noq_cols]
-    X_obs_noq = xy_df.loc[scenarios, X_obs_noq_cols]
+    X_pp_noq = xy_df.loc[:, X_pp_noq_cols]
+    X_ldr_noq = xy_df.loc[:, X_ldr_noq_cols]
+    X_obs_noq = xy_df.loc[:, X_obs_noq_cols]
 
     # PP
-    X_pp_basicq = xy_df.loc[scenarios, X_pp_basicq_cols]
+    X_pp_basicq = xy_df.loc[:, X_pp_basicq_cols]
 
-    X_pp_occmean_onlyq = xy_df.loc[scenarios, X_pp_occmean_onlyq_cols]
-    X_pp_occp95_onlyq = xy_df.loc[scenarios, X_pp_occp95_onlyq_cols]
+    X_pp_occmean_onlyq = xy_df.loc[:, X_pp_occmean_onlyq_cols]
+    X_pp_occp95_onlyq = xy_df.loc[:, X_pp_occp95_onlyq_cols]
     X_pp_occp95_onlyq['sqrt_load_pp'] = X_pp_occp95_onlyq['load_pp'] ** 0.5
 
     # LDR
-    X_ldr_basicq = xy_df.loc[scenarios, X_ldr_basicq_cols]
-    X_ldr_q = xy_df.loc[scenarios, X_ldr_q_cols]
+    X_ldr_basicq = xy_df.loc[:, X_ldr_basicq_cols]
+    X_ldr_q = xy_df.loc[:, X_ldr_q_cols]
 
-    X_ldr_occmean_onlyq = xy_df.loc[scenarios, X_ldr_occmean_onlyq_cols]
-    X_ldr_occp95_onlyq = xy_df.loc[scenarios, X_ldr_occp95_onlyq_cols]
-    X_ldr_probblocked_onlyq = xy_df.loc[scenarios, X_ldr_probblocked_onlyq_cols]
-    X_ldr_condmeantimeblocked_onlyq = xy_df.loc[scenarios, X_ldr_condmeantimeblocked_onlyq_cols]
+    X_ldr_occmean_onlyq = xy_df.loc[:, X_ldr_occmean_onlyq_cols]
+    X_ldr_occp95_onlyq = xy_df.loc[:, X_ldr_occp95_onlyq_cols]
+    X_ldr_probblocked_onlyq = xy_df.loc[:, X_ldr_probblocked_onlyq_cols]
+    X_ldr_condmeantimeblocked_onlyq = xy_df.loc[:, X_ldr_condmeantimeblocked_onlyq_cols]
 
     # OBS
-    X_obs_basicq = xy_df.loc[scenarios, X_obs_basicq_cols]
-    X_obs_q = xy_df.loc[scenarios, X_obs_q_cols]
+    X_obs_basicq = xy_df.loc[:, X_obs_basicq_cols]
+    X_obs_q = xy_df.loc[:, X_obs_q_cols]
 
-    X_obs_occmean_onlyq = xy_df.loc[scenarios, X_obs_occmean_onlyq_cols]
-    X_obs_occp95_onlyq = xy_df.loc[scenarios, X_obs_occp95_onlyq_cols]
-    X_obs_probblocked_onlyq = xy_df.loc[scenarios, X_obs_probblocked_onlyq_cols]
-    X_obs_condmeantimeblocked_onlyq = xy_df.loc[scenarios, X_obs_condmeantimeblocked_onlyq_cols]
+    X_obs_occmean_onlyq = xy_df.loc[:, X_obs_occmean_onlyq_cols]
+    X_obs_occp95_onlyq = xy_df.loc[:, X_obs_occp95_onlyq_cols]
+    X_obs_probblocked_onlyq = xy_df.loc[:, X_obs_probblocked_onlyq_cols]
+    X_obs_condmeantimeblocked_onlyq = xy_df.loc[:, X_obs_condmeantimeblocked_onlyq_cols]
 
     # y vectors
-    y_obs_occmean = xy_df.loc[scenarios, 'occ_mean_mean_obs']
-    y_obs_occp95 = xy_df.loc[scenarios, 'occ_mean_p95_obs']
-    y_ldr_occmean = xy_df.loc[scenarios, 'occ_mean_mean_ldr']
-    y_ldr_occp95 = xy_df.loc[scenarios, 'occ_mean_p95_ldr']
-    y_pp_occmean = xy_df.loc[scenarios, 'occ_mean_mean_pp']
-    y_pp_occp95 = xy_df.loc[scenarios, 'occ_mean_p95_pp']
+    y_obs_occmean = xy_df.loc[:, 'occ_mean_mean_obs']
+    y_obs_occp95 = xy_df.loc[:, 'occ_mean_p95_obs']
+    y_ldr_occmean = xy_df.loc[:, 'occ_mean_mean_ldr']
+    y_ldr_occp95 = xy_df.loc[:, 'occ_mean_p95_ldr']
+    y_pp_occmean = xy_df.loc[:, 'occ_mean_mean_pp']
+    y_pp_occp95 = xy_df.loc[:, 'occ_mean_p95_pp']
 
-    y_obs_probblocked = xy_df.loc[scenarios, 'prob_blockedby_ldr']
-    y_obs_condmeantimeblocked = xy_df.loc[scenarios, 'condmeantime_blockedby_ldr']
+    y_obs_probblocked = xy_df.loc[:, 'prob_blockedby_ldr']
+    y_obs_condmeantimeblocked = xy_df.loc[:, 'condmeantime_blockedby_ldr']
 
-    y_ldr_probblocked = xy_df.loc[scenarios, 'prob_blockedby_pp']
-    y_ldr_condmeantimeblocked = xy_df.loc[scenarios, 'condmeantime_blockedby_pp']
+    y_ldr_probblocked = xy_df.loc[:, 'prob_blockedby_pp']
+    y_ldr_condmeantimeblocked = xy_df.loc[:, 'condmeantime_blockedby_pp']
 
     # Write dataframes to csv
     X_pp_noq.to_csv(Path(output_path, f'X_pp_noq_{exp}.csv'))
@@ -283,16 +283,6 @@ def process_command_line():
         help="Path to directory in which to create X and y data files"
     )
 
-    parser.add_argument(
-        "scenario_start", type=str, default=None,
-        help="Start of slice object for use in pandas loc selector"
-    )
-
-    parser.add_argument(
-        "scenario_end", type=str, default=None,
-        help="End of slice object for use in pandas loc selector"
-    )
-
     # Do the parsing and return the populated namespace with the input arg values
     args = parser.parse_args()
     return args
@@ -300,23 +290,11 @@ def process_command_line():
 
 if __name__ == '__main__':
 
-    override_args = True
-
-    if override_args:
-        exp = "exp15"
-        siminout_qng_path = Path("../output", exp, f"scenario_siminout_{exp}.csv")
-        output_data_path = Path(f"input/{exp}")
-        scenarios = slice(1, 45)
-    else:
-        mm_args = process_command_line()
-        exp = mm_args.experiment
-        siminout_qng_path = mm_args.siminout_qng_path
-        if (mm_args.scenario_start is not None) and (mm_args.scenario_end is not None):
-            scenarios = slice(int(mm_args.scenario_start), int(mm_args.scenario_end))
-        else:
-            scenarios = None
-        output_data_path = mm_args.output_data_path
+    mm_args = process_command_line()
+    exp = mm_args.experiment
+    siminout_qng_path = mm_args.siminout_qng_path
+    output_data_path = mm_args.output_data_path
 
     # Now scenario_tools.scenario_grid_to_csv adds the qng approximations to the input file
     #create_siminout_qng(siminout_path, siminout_qng_path)
-    create_x_y(exp, siminout_qng_path, scenarios, output_data_path)
+    create_x_y(exp, siminout_qng_path, output_data_path)

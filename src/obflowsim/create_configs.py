@@ -211,11 +211,12 @@ def process_command_line(argv=None):
     )
 
     parser.add_argument(
-        'run_script_chunk_size', type=int,
+        '--chunk_size', '-c', type=int, default=None,
         help="Number of run simulation commands in each script file."
     )
 
-    parser.add_argument('--update_rho_checks', '-u', dest='update_rho', action='store_true')
+    parser.add_argument('--update_rho_checks', '-u', dest='update_rho', action='store_true',
+                        help='Use flag if capacity levels explicitly set')
 
     # do the parsing
     args = parser.parse_args(argv)
@@ -232,7 +233,8 @@ def main(argv=None):
                                                           args.configs_path,
                                                           args.run_script_path, args.update_rho)
 
-    create_run_script_chunks(run_script_file_path, args.run_script_chunk_size)
+    if args.chunk_size:
+        create_run_script_chunks(run_script_file_path, args.run_script_chunk_size)
 
 
 if __name__ == '__main__':

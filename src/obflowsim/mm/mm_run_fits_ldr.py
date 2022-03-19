@@ -60,11 +60,11 @@ def fit_models(experiment):
     # Fit models
 
     # Queueing models
-    ldr_occmean_q_load_results = \
+    ldr_occmean_q_effload_results = \
         crossval_summarize_mm('ldr_occmean_q_effload', 'ldr', 'occmean', X_ldr_q, y_ldr_occmean, scale=False,
                               flavor='load', col_idx_arate=0, col_idx_meansvctime=21)
 
-    ldr_occp95_q_sqrtload_results = \
+    ldr_occp95_q_sqrteffload_results = \
         crossval_summarize_mm('ldr_occp95_q_sqrteffload', 'ldr', 'occp95', X_ldr_q, y_ldr_occp95, scale=False,
                               flavor='sqrtload', col_idx_arate=0, col_idx_meansvctime=21, load_pctile=0.95)
 
@@ -363,7 +363,7 @@ def fit_models(experiment):
                               scale=True, flavor='svr')
 
     condmeantimeblocked_q_svr_results = \
-        crossval_summarize_mm('ldr_condmeantimeblocked_q_svr', 'ldr', 'condmeantime_blockedby',
+        crossval_summarize_mm('ldr_condmeantimeblocked_q_svr', 'ldr', 'condmeantimeblocked',
                               X_ldr_q, y_ldr_condmeantimeblocked,
                               scale=True, flavor='svr')
 
@@ -444,7 +444,7 @@ def fit_models(experiment):
                    'ldr_occmean_basicq_nn_results': ldr_occmean_basicq_nn_results,
                    'ldr_occmean_q_nn_results': ldr_occmean_q_nn_results,
                    'ldr_occmean_noq_nn_results': ldr_occmean_noq_nn_results,
-                   'ldr_occmean_q_load_results': ldr_occmean_q_load_results,
+                   'ldr_occmean_q_effload_results': ldr_occmean_q_effload_results,
                    'ldr_occp95_basicq_lm_results': ldr_occp95_basicq_lm_results,
                    'ldr_occp95_q_lm_results': ldr_occp95_q_lm_results,
                    'ldr_occp95_noq_lm_results': ldr_occp95_noq_lm_results,
@@ -463,7 +463,7 @@ def fit_models(experiment):
                    'ldr_occp95_basicq_nn_results': ldr_occp95_basicq_nn_results,
                    'ldr_occp95_q_nn_results': ldr_occp95_q_nn_results,
                    'ldr_occp95_noq_nn_results': ldr_occp95_noq_nn_results,
-                   'ldr_occp95_q_sqrtload_results': ldr_occp95_q_sqrtload_results,
+                   'ldr_occp95_q_sqrteffload_results': ldr_occp95_q_sqrteffload_results,
                    'ldr_probblocked_basicq_lm_results': probblocked_basicq_lm_results,
                    'ldr_probblocked_q_lm_results': probblocked_q_lm_results,
                    'ldr_probblocked_noq_lm_results': probblocked_noq_lm_results,

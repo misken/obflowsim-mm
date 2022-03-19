@@ -116,7 +116,7 @@ Run the shell scripts to run the simulation scenarios
 
 .. code::
 
-    sh ./run/exp14_run.sh
+    sh ./run/exp14/exp14_run.sh
 
  
 Run obflow_io.py to concatenate the scenario rep files

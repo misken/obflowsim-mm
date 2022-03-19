@@ -27,6 +27,21 @@ def create_coeff_plots(experiment, unit, results_dict, figures_path):
             scatter_plot.savefig(Path(figures_path, plot_name))
 
 
+def output_model_coeffs(experiment, results_dict, output_path):
+    """NOT IMPLEMENTED"""
+
+    for key in results_dict.keys():
+        unit_pm_qdata_model = results_dict[key]['unit_pm_qdata_model']
+
+        if 'coeffs_df' in results_dict[key].keys():
+            # model = results_dict[key]['model']
+            # flavor = results_dict[key]['flavor']
+            coeffs_df = results_dict[key]['coeffs_df']
+            coeffs_df.to_csv(Path(output_path, f"{experiment}_{unit_pm_qdata_model}_coeffs.csv"), index=False)
+
+
+
+
 def create_predictions_df(results_dict):
     dfs = []
     for key in results_dict.keys():
@@ -150,6 +165,8 @@ if __name__ == '__main__':
 
         predictions_df = create_predictions_df(results_dict)
         predictions_df.to_csv(Path(output_path, f"{experiment}_{unit}_predictions.csv"), index=False)
+
+        output_model_coeffs(experiment, results_dict, output_path)
 
 
 

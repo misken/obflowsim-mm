@@ -142,6 +142,59 @@ def hyper_erlang_cv2(means, stages, probs):
     cv2 = var / mean ** 2
     return cv2
 
+def process_command_line():
+    """
+    Parse command line arguments
+
+    `argv` is a list of arguments, or `None` for ``sys.argv[1:]``.
+    Return a Namespace representing the argument list.
+    """
+
+    # Create the parser
+    parser = argparse.ArgumentParser(prog='mm_merge_predict_simulated',
+                                     description='merge simulation scenario output with mm predictions')
+
+    # Add arguments
+    parser.add_argument(
+        "mm_experiment", type=str,
+        help="Experiment used to fit metamodels"
+    )
+
+    parser.add_argument(
+        "predict_experiment", type=str,
+        help="Experiment for which to predict"
+    )
+
+    parser.add_argument(
+        "scenario_input_path_filename", type=str,
+        help="Path to csv file which contains scenario inputs"
+    )
+
+    parser.add_argument(
+        "y_data_path", type=str,
+        help="Path to directory containing y data files (which are created from sim output)"
+    )
+
+    parser.add_argument(
+        "output_filename", type=str,
+        help="Path to merged output csv file"
+    )
+
+    # Do the parsing and return the populated namespace with the input arg values
+    args = parser.parse_args()
+    return args
+
+
+def main(argv=None):
+    # Parse command line arguments
+    mm_args = process_command_line()
+    mm_exp = mm_args.mm_experiment_suffix
+    pred_exp = mm_args.predict_experiment
+    scenario_input_path_filename = mm_args.scenario_input_path_filename
+    
+    y_data_path = mm_args.y_data_path
+    output_filename = mm_args.output_filename
+
 
 if __name__ == '__main__':
 
@@ -149,7 +202,7 @@ if __name__ == '__main__':
 
     if override_args:
         mm_experiment_suffix = 'exp13'
-        perf_curve_scenarios_suffix = 'exp15'
+        perf_curve_scenarios_suffix = 'exp16'
         # Path to scenario input csv file created by scenario_tools.py (input)
         scenario_input_path_filename = \
             Path(f'input/{perf_curve_scenarios_suffix}/{perf_curve_scenarios_suffix}_obflowsim_scenario_inputs.csv')
@@ -233,130 +286,12 @@ if __name__ == '__main__':
 
             print(f'done with predictions for {unit}')
 
-
-
-        # Queueing approximation based models for ldr
-        # scenarios_predictions_df['pred_ldr_occmean_onlyq_lm'] = \
-        #     ldr_results['ldr_occmean_onlyq_lm_results']['model'].predict(scenarios_x_dfs['X_ldr_occmean_onlyq'])
-        #
-        # scenarios_predictions_df['pred_ldr_occp95_onlyq_lm'] = \
-        #     ldr_results['ldr_occp95_onlyq_lm_results']['model'].predict(scenarios_x_dfs['X_ldr_occp95_onlyq'])
-        #
-        # scenarios_predictions_df['pred_probblocked_onlyq_lm'] = \
-        #     ldr_results['ldr_probblocked_onlyq_lm_results']['model'].predict(
-        #         scenarios_x_dfs['X_ldr_probblocked_onlyq'])
-        #
-        # scenarios_predictions_df['pred_probblocked_q_erlangc'] = \
-        #     ldr_results['ldr_probblocked_q_erlangc_results']['model'].predict(
-        #         scenarios_x_dfs['X_ldr_q'])
-        #
-        # scenarios_predictions_df['pred_condmeantimeblocked_onlyq_lm'] = \
-        #     ldr_results['ldr_condmeantimeblocked_onlyq_lm_results']['model'].predict(
-        #         scenarios_x_dfs['X_ldr_condmeantimeblocked_onlyq'])
-        #
-        # scenarios_predictions_df['pred_condmeantimeblocked_q_mgs'] = \
-        #     ldr_results['ldr_condmeantimeblocked_q_mgc_results']['model'].predict(
-        #         scenarios_x_dfs['X_ldr_q'])
-
-        # Create long dataframe from results list
-        # First create list of tuples
         unit_predictions_tuples = [(s, result['unit'], result['measure'], result['qdata'], result['model'], p)
                                   for result in unit_predictions
                                   for (s, p) in zip(result['scenarios'], result['predictions'])]
 
         unit_predictions_long_df = pd.DataFrame(unit_predictions_tuples,
                                                columns=['scenario', 'unit', 'measure', 'qdata', 'model', 'prediction'])
-
-
-
-        # PP predictions
-        # features_models_pp = [('basicq', 'lm'), ('noq', 'lm'),
-        #                        ('basicq', 'lassocv'), ('noq', 'lassocv'),
-        #                        ('basicq', 'poly'), ('noq', 'poly'),
-        #                        ('basicq', 'rf'), ('noq', 'rf'),
-        #                        ('basicq', 'nn'), ('noq', 'nn')]
-        #
-        # pp_predictions = []
-        #
-        # for f, m in features_models_pp:
-        #     for measure in ['occmean', 'occp95']:
-        #         scenarios_predictions_df[f'pred_pp_{measure}_{f}_{m}'] = \
-        #             pp_results[f'pp_{measure}_{f}_{m}_results']['model'].predict(scenarios_x_dfs[f'X_pp_{f}'])
-        #
-        #         result = {'qdata': f, 'model': m,
-        #                   'measure': measure,
-        #                   'scenarios': scenarios_predictions_df['scenario'],
-        #                   'predictions': scenarios_predictions_df[f'pred_pp_{measure}_{f}_{m}']}
-        #
-        #         pp_predictions.append(result)
-        #
-        # pp_predictions_tuples = [(s, 'pp', result['measure'], result['qdata'], result['model'], p)
-        #                           for result in pp_predictions
-        #                           for (s, p) in zip(result['scenarios'], result['predictions'])]
-        #
-        # pp_predictions_long_df = pd.DataFrame(pp_predictions_tuples,
-        #                                        columns=['scenario', 'unit', 'measure', 'qdata', 'model', 'prediction'])
-        #
-        # # onlyq pp
-        # scenarios_predictions_df['pred_pp_occmean_onlyq_lm'] = \
-        #     pp_results['pp_occmean_onlyq_lm_results']['model'].predict(scenarios_x_dfs['X_pp_occmean_onlyq'])
-        # scenarios_predictions_df['pred_pp_occp95_onlyq_lm'] = \
-        #     pp_results['pp_occp95_onlyq_lm_results']['model'].predict(scenarios_x_dfs['X_pp_occp95_onlyq'])
-        #
-        # print('done with new style predictions for PP')
-
-        # OBS predictions
-        # features_models_obs = [('q', 'lm'), ('basicq', 'lm'), ('noq', 'lm'),
-        #                        ('q', 'lassocv'), ('basicq', 'lassocv'), ('noq', 'lassocv'),
-        #                        ('q', 'poly'), ('basicq', 'poly'), ('noq', 'poly'),
-        #                        ('q', 'rf'), ('basicq', 'rf'), ('noq', 'rf'),
-        #                        ('q', 'nn'), ('basicq', 'nn'), ('noq', 'nn')]
-        #
-        # obs_predictions = []
-        #
-        # for f, m in features_models_obs:
-        #     for measure in ['occmean', 'occp95', 'probblocked', 'condmeantimeblocked']:
-        #
-        #         scenarios_predictions_df[f'pred_obs_{measure}_{f}_{m}'] = \
-        #             obs_results[f'obs_{measure}_{f}_{m}_results']['model'].predict(scenarios_x_dfs[f'X_obs_{f}'])
-        #
-        #         result = {'qdata': f, 'model': m,
-        #                   'measure': measure,
-        #                   'scenarios': scenarios_predictions_df['scenario'],
-        #                   'predictions': scenarios_predictions_df[f'pred_obs_{measure}_{f}_{m}']}
-        #
-        #         obs_predictions.append(result)
-        #
-        # obs_predictions_tuples = [(s, 'obs', result['measure'], result['qdata'], result['model'], p)
-        #                           for result in obs_predictions
-        #                           for (s, p) in zip(result['scenarios'], result['predictions'])]
-        #
-        # obs_predictions_long_df = pd.DataFrame(obs_predictions_tuples,
-        #                                        columns=['scenario', 'unit', 'measure', 'qdata', 'model', 'prediction'])
-        #
-        # scenarios_predictions_df['pred_obs_occmean_onlyq_lm'] = \
-        #     obs_results['obs_occmean_onlyq_lm_results']['model'].predict(scenarios_x_dfs['X_obs_occmean_onlyq'])
-        #
-        # scenarios_predictions_df['pred_obs_occp95_onlyq_lm'] = \
-        #     obs_results['obs_occp95_onlyq_lm_results']['model'].predict(scenarios_x_dfs['X_obs_occp95_onlyq'])
-        #
-        # scenarios_predictions_df['pred_probblocked_onlyq_lm'] = \
-        #     obs_results['obs_probblocked_onlyq_lm_results']['model'].predict(
-        #         scenarios_x_dfs['X_obs_probblocked_onlyq'])
-        #
-        # scenarios_predictions_df['pred_probblocked_q_erlangc'] = \
-        #     obs_results['obs_probblocked_q_erlangc_results']['model'].predict(
-        #         scenarios_x_dfs['X_obs_q'])
-        #
-        # scenarios_predictions_df['pred_condmeantimeblocked_onlyq_lm'] = \
-        #     obs_results['obs_condmeantimeblocked_onlyq_lm_results']['model'].predict(
-        #         scenarios_x_dfs['X_obs_condmeantimeblocked_onlyq'])
-        #
-        # print('done with new style predictions for OBS')
-
-        # Concat the unit specific long dataframes
-        # scenarios_predictions_long_df = pd.concat([ldr_predictions_long_df,
-        #                                            pp_predictions_long_df, obs_predictions_long_df])
 
         unit_predictions_long_df.to_csv(performance_curve_predictions_long_path_filename, index=False)
 
