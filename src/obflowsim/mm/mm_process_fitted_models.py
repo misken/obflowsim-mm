@@ -7,6 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
+
 def create_cv_plots(experiment, unit, results_dict, figures_path):
 
     for key in results_dict.keys():
@@ -88,6 +89,28 @@ def create_metrics_df(results_dict):
     return consolidated_metrics_df
 
 
+def get_feature_importance(results_dict):
+
+    scoring = ['r2', 'neg_mean_absolute_percentage_error', 'neg_mean_absolute_error']
+
+    for key in results_dict.keys():
+        unit_pm_qdata_model = results_dict[key]['unit_pm_qdata_model']
+
+        if 'importance' in results_dict[key].keys():
+            print(unit_pm_qdata_model)
+            importance = results_dict[key]['importance']
+            feature_names = results_dict[key]['var_names']
+
+            for metric in importance:
+                print(f"{metric}")
+                r = importance[metric]
+                for i in r.importances_mean.argsort()[::-1]:
+                    if r.importances_mean[i] - 2 * r.importances_std[i] > 0:
+                        print(f"    {feature_names[i]:<8}"
+                              f"{r.importances_mean[i]:.3f}"
+                              f" +/- {r.importances_std[i]:.3f}")
+
+
 def process_command_line():
     """
     Parse command line arguments
@@ -113,7 +136,7 @@ def process_command_line():
 
     parser.add_argument(
         "pkl_to_process", type=str,
-        help="Pickle filename containing model fit results"
+        help="Pickle path and filename containing model fit results"
     )
 
     parser.add_argument(
@@ -124,6 +147,11 @@ def process_command_line():
     parser.add_argument(
         "--figures_path", type=str, default=None,
         help="Directory to write figures"
+    )
+
+    parser.add_argument(
+        "--importance", action='store_true',
+        help="Include to report importance values for rf and nnet"
     )
 
     # do the parsing
@@ -137,22 +165,24 @@ if __name__ == '__main__':
 
     if override_args:
         experiment = "exp13"
-        unit = "ldr"
+        unit = "pp"
         output_path = f"output/{experiment}"
-        pickle_path_filename = Path(output_path, f"{experiment}_{unit}_results.pkl")
+        output_path = None
+        pkl_to_process = Path(f"output/{experiment}", f"{experiment}_{unit}_results.pkl")
         #figures_path = f"output/{experiment}/figures"
         figures_path = None
+        importance = True
     else:
         pfm_args = process_command_line()
         experiment = pfm_args.experiment
         unit = pfm_args.unit
         output_path = pfm_args.output_path
+        importance = pfm_args.importance
         pkl_to_process = pfm_args.pkl_to_process
         pickle_path_filename = Path(output_path, pkl_to_process)
-
         figures_path = pfm_args.figures_path
 
-    with open(pickle_path_filename, 'rb') as pickle_file:
+    with open(pkl_to_process, 'rb') as pickle_file:
         results_dict = pickle.load(pickle_file)
 
     if figures_path is not None:
@@ -167,6 +197,10 @@ if __name__ == '__main__':
         predictions_df.to_csv(Path(output_path, f"{experiment}_{unit}_predictions.csv"), index=False)
 
         output_model_coeffs(experiment, results_dict, output_path)
+
+    if importance:
+        get_feature_importance(results_dict)
+
 
 
 

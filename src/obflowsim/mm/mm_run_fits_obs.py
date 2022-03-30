@@ -548,8 +548,6 @@ def fit_models(experiment):
                    'obs_condmeantimeblocked_noq_nn_results': condmeantimeblocked_noq_nn_results,
                    'obs_occmean_q_load_results': obs_occmean_q_load_results,
                    'obs_occp95_q_sqrtload_results': obs_occp95_q_sqrtload_results,
-                   'obs_occmean_q_effload_results': obs_occmean_q_effload_results,
-                   'obs_occp95_q_sqrteffload_results': obs_occp95_q_sqrteffload_results,
                    'obs_probblocked_q_erlangc_results': probblocked_q_erlangc_results,
                    'obs_condmeantimeblocked_q_mgc_results': condmeantimeblocked_q_mgc_results,
                    'obs_occmean_onlyq_lm_results': obs_occmean_onlyq_lm_results,

@@ -18,6 +18,7 @@ from sklearn.svm import SVR
 from sklearn.neural_network import MLPRegressor
 from sklearn.model_selection import cross_validate, cross_val_score, cross_val_predict, KFold
 from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error
+from sklearn.inspection import permutation_importance
 
 # explicitly require this experimental feature prior to v1.0 of sklearn
 # from sklearn.experimental import enable_hist_gradient_boosting  # noqa
@@ -81,7 +82,7 @@ def crossval_summarize_mm(unit_pm_qdata_model, unit, measure, X, y, flavor='lm',
     var_names = X.columns.to_list()
 
     flavors_nocv = ['erlangc', 'load', 'sqrtload', 'condmeanwaitldr']
-
+    flavors_importance = ['rf', 'nnet']
     flavors_w_coeffs = ['lm', 'lasso', 'lassocv', 'poly']
     # Only need mappings for flavors in flavors_w_coeffs
     flavor_estimator = {'lm': 'linearregression',
@@ -141,6 +142,12 @@ def crossval_summarize_mm(unit_pm_qdata_model, unit, measure, X, y, flavor='lm',
                             return_train_score=return_train_score, return_estimator=return_estimator)
 
     model_final.fit(X, y)
+
+    # Do importance measures
+    if flavor in flavors_importance:
+        importance = permutation_importance(
+            model_final, X, y, n_repeats=30, random_state=0, scoring=scoring)
+
 
     # Extract coefficients for relevant flavors
     if flavor in flavors_w_coeffs:
@@ -229,6 +236,7 @@ def crossval_summarize_mm(unit_pm_qdata_model, unit, measure, X, y, flavor='lm',
                    'measure': measure,
                    'flavor': flavor,
                    'unit': unit,
+                   'var_names': var_names,
                    'model': model_final,
                    'qdata' : qdata,
                    'cv': cv_iterator,
@@ -246,6 +254,7 @@ def crossval_summarize_mm(unit_pm_qdata_model, unit, measure, X, y, flavor='lm',
                    'measure': measure,
                    'flavor': flavor,
                    'unit': unit,
+                   'var_names': var_names,
                    'model': model_final,
                    'qdata': qdata,
                    'cv': cv_iterator,
@@ -253,6 +262,9 @@ def crossval_summarize_mm(unit_pm_qdata_model, unit, measure, X, y, flavor='lm',
                    'predictions': predictions,
                    'residuals': residuals,
                    'fitplot': fig_scatter}
+
+        if flavor in flavors_importance:
+            results['importance'] = importance
 
     return results
 
