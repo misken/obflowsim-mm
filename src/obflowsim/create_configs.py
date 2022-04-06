@@ -80,7 +80,7 @@ def create_configs_from_inputs_csv(exp, scenarios_csv_file_path, simulation_sett
             with open(config_file_path, 'w', encoding='utf-8') as config_file:
                 yaml.dump(config, config_file)
 
-            run_line = f"python obflow_sim.py {config_file_path} --loglevel=WARNING\n"
+            run_line = f"obflow_sim {config_file_path} --loglevel=WARNING\n"
             bat_file.write(run_line)
 
         # Create output file processing line

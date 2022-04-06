@@ -7,12 +7,11 @@ Setting up and running a multiscenario simulation experiment
 
 The main steps are:
 
-* Create the scenario input file
-* Generate simulation config file for each scenario 
-* Generate shell scripts to run the simulation scenarios
-* Run the shell scripts to run the simulation scenarios
-* Run obflow_io.py to concatenate the scenario rep files into one big scenario rep file
-* Run obflow_stat.py to create the simulation summary files 
+* Create the scenario input file (``scenario_tools``)
+* Generate simulation config file and for each scenario and shell scripts to run the scenarios (``create_configs``)
+* Run the shell scripts to run the simulation scenarios (``obflow_sim``)
+* Concatenate the scenario rep files into one big scenario rep file(``obflow_io``)
+* Create the simulation summary files (``obflow_stat``)
 
 The input output summary file created after this final step
 is ready to use in metamodel fitting and evaluation. The summary file
@@ -72,9 +71,9 @@ and `cap_pp` capacity levels.
 Assume you've create a scenario recipe file named `exp14_scenario_recipe.yaml`. Calling
 
 .. code::
-    python scenario_tools.py exp14 input/exp14/exp14_scenario_recipe.yaml -i input/exp14/
+    scenario_tools exp14 input/exp14/exp14_scenario_recipe.yaml -i input/exp14/
     
-will generate the simuation scenario input file named `exp14_obflowsim_scenario_inputs.csv` in 
+will generate the simulation scenario input file named `exp14_obflowsim_scenario_inputs.csv` in
 the `.inputs/exp14/` directory. Now we are ready to generate the configuration files for
 each simulation scenario.
     
@@ -96,7 +95,7 @@ For example,
 
 .. code::
 
-    python create_configs.py exp14 \
+    create_configs exp14 \
         input/exp14/exp14_obflowsim_scenario_inputs.csv \
         input/exp14/exp14_obflowsim_settings.yaml \
         input/exp14/config run/exp14 500
@@ -113,6 +112,14 @@ of parallel processing.
 
 Run the shell scripts to run the simulation scenarios
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A single scenario can be run by using ``obflow_sim``. For
+
+.. code::
+    obflow_sim input/exp14/config/exp14_scenario_1.yaml
+
+The shell scripts generated in the previous step are just a sequence of such
+single scenario command lines.
 
 .. code::
 

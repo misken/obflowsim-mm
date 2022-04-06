@@ -644,8 +644,6 @@ def simulate(sim_inputs, rep_num):
     return scenario_rep_summary_dict
 
 
-
-
 def main(argv=None):
     """
 
