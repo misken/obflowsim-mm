@@ -126,7 +126,7 @@ single scenario command lines.
     sh ./run/exp14/exp14_run.sh
 
  
-Run obflow_io.py to concatenate the scenario rep files
+Run ``obflow_io`` to concatenate the scenario rep files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This will create the main output summary file with one row per (scenario, rep) pair.
@@ -139,10 +139,10 @@ This will create the main output summary file with one row per (scenario, rep) p
     
 .. code::
 
-    python obflow_io.py output/exp14/summary_stats/ output/exp14/ summary_stats_scenario exp14_scenario_rep_simout
+    obflow_io output/exp14/summary_stats/ output/exp14/ summary_stats_scenario exp14_scenario_rep_simout
 
 
-Run obflow_stat.py to create the simulation summary files
+Run ``obflow_stat`` to create the simulation summary files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 At this point we have statistics for each (scenario, rep) pair and need to aggregate
@@ -157,12 +157,18 @@ over the replications to get stats by scenario.
 
 .. code::
 
-    python obflow_stat.py output/exp14/exp14_scenario_rep_simout.csv output/exp14 exp14 --include_inputs --scenario_inputs_path input/exp14/exp14_obflowsim_scenario_inputs.csv
+    obflow_stat output/exp14/exp14_scenario_rep_simout.csv output/exp14 exp14 --include_inputs --scenario_inputs_path input/exp14/exp14_obflowsim_scenario_inputs.csv
 
 Aggregates by scenario (over the replications).
 Merges scenario inputs (which include the queueing approximations) with scenario simulation summary stats.
 
-The input output summary file is ready to use in metamodeling experiments
+The input output summary file is ready to use in metamodeling experiments. It will
+be named ``scenario_siminout_{experiment id}.csv``. Continuing our example, the output
+file is ``scenario_siminout_exp14.csv``
+
+
+
+
 
 Fitting and evaluation of simulation metamodels
 -------------------------------------------------------------
@@ -174,6 +180,25 @@ The main steps in fitting metamodels are:
     - still need to add a CLI to these (added on 2022-02-25)
     - output includes metrics summary csv, actual vs predicted plots and coefficient plots
 * Further output analysis (ongoing work)
+
+Generate the X and y matrix data files
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code::
+
+    mm_dataprep exp14 input/exp14_obflowsim_scenario_inputs.csv mmdata/exp14/
+
+Metamodel fitting
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. code::
+
+    mm_run_fits_obs mmdata/exp14/ mmoutput/exp14/ mmoutput/exp14/plots/
+    mm_run_fits_ldr mmdata/exp14/ mmoutput/exp14/ mmoutput/exp14/plots/
+    mm_run_fits_pp mmdata/exp14/ mmoutput/exp14/ mmoutput/exp14/plots/
+
+The output includes a pickle file containing detailed model fitting results. See code.
+Predicted vs. actual plots as well as coefficient plots are also created.
 
 Generating and evaluation of performance curves
 -----------------------------------------------

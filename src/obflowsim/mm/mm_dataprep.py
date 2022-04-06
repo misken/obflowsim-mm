@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 import argparse
 import math
@@ -288,13 +289,29 @@ def process_command_line():
     return args
 
 
-if __name__ == '__main__':
+def main(argv=None):
+    """
 
-    mm_args = process_command_line()
-    exp = mm_args.experiment
-    siminout_qng_path = mm_args.siminout_qng_path
-    output_data_path = mm_args.output_data_path
+    Parameters
+    ----------
+    argv
 
-    # Now scenario_tools.scenario_grid_to_csv adds the qng approximations to the input file
-    #create_siminout_qng(siminout_path, siminout_qng_path)
+    Returns
+    -------
+
+    """
+
+    # Parse command line arguments
+    args = process_command_line(argv)
+
+    exp = args.experiment
+    siminout_qng_path = args.siminout_qng_path
+    output_data_path = args.output_data_path
+
     create_x_y(exp, siminout_qng_path, output_data_path)
+
+
+if __name__ == '__main__':
+    sys.exit(main())
+
+

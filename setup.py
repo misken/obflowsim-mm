@@ -15,6 +15,7 @@ setup(
             'obflow_sim=obflowsim.obflow_sim:main',
             'obflow_io=obflowsim.obflow_io:main',
             'obflow_stat=obflowsim.obflow_stat:main',
+            'mm_dataprep=obflowsim.mm.mm_dataprep:main',
         ],
     },
     version='0.1.0',

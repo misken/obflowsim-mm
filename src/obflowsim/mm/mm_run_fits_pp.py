@@ -12,7 +12,7 @@ from obflowsim.mm.mm_process_fitted_models import create_metrics_df, create_pred
 UNIT = "pp"
 
 
-def fit_models(experiment):
+def fit_models(experiment, input_path, output_path, figures_path):
     """
     Fit metamodels for OBS unit
 
@@ -26,9 +26,9 @@ def fit_models(experiment):
     """
 
     unit = UNIT
-    input_path = Path(f"input/{experiment}")
-    output_path = Path(f"output/{experiment}")
-    figures_path = Path(f"output/{experiment}", "figures")
+    # input_path = Path(f"input/{experiment}")
+    # output_path = Path(f"output/{experiment}")
+    # figures_path = Path(f"output/{experiment}", "figures")
 
 
     metrics_path_filename = Path(output_path, f"{experiment}_{unit}_metrics.csv")
@@ -226,6 +226,21 @@ def process_command_line(argv=None):
         help="Experiment ID; used in folder and filenames"
     )
 
+    parser.add_argument(
+        "input_path", type=str,
+        help="Path containing X and y csv files"
+    )
+
+    parser.add_argument(
+        "output_path", type=str,
+        help="Path for model fit outputs (except plots)"
+    )
+
+    parser.add_argument(
+        "plots_path", type=str,
+        help="Path for output plots"
+    )
+
     # do the parsing
     args = parser.parse_args(argv)
     return args
@@ -248,7 +263,8 @@ def main(argv=None):
     args = process_command_line(argv)
 
     # fit models
-    fit_models(args.experiment)
+    fit_models(args.experiment,
+               Path(args.input_path), Path(args.output_path), Path(args.plot_path))
 
     return 0
 
