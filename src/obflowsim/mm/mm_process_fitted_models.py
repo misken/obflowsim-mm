@@ -111,7 +111,7 @@ def get_feature_importance(results_dict):
                               f" +/- {r.importances_std[i]:.3f}")
 
 
-def process_command_line():
+def process_command_line(argv=None):
     """
     Parse command line arguments
 
@@ -159,9 +159,19 @@ def process_command_line():
     return args
 
 
-if __name__ == '__main__':
+def main(argv=None):
+    """
 
-    override_args = True
+    Parameters
+    ----------
+    argv
+
+    Returns
+    -------
+
+    """
+
+    override_args = False
 
     if override_args:
         experiment = "exp13"
@@ -173,13 +183,12 @@ if __name__ == '__main__':
         figures_path = None
         importance = True
     else:
-        pfm_args = process_command_line()
+        pfm_args = process_command_line(argv)
         experiment = pfm_args.experiment
         unit = pfm_args.unit
         output_path = pfm_args.output_path
         importance = pfm_args.importance
         pkl_to_process = pfm_args.pkl_to_process
-        pickle_path_filename = Path(output_path, pkl_to_process)
         figures_path = pfm_args.figures_path
 
     with open(pkl_to_process, 'rb') as pickle_file:
@@ -202,5 +211,6 @@ if __name__ == '__main__':
         get_feature_importance(results_dict)
 
 
-
+if __name__ == '__main__':
+    sys.exit(main())
 

@@ -50,12 +50,12 @@ def fit_models(experiment, input_path, output_path, figures_path):
         pd.read_csv(Path(input_path, f'X_ldr_condmeantimeblocked_onlyq_{experiment}.csv'), index_col=0)
 
     # y vectors
-    y_ldr_occmean = pd.read_csv(Path(input_path, f'y_ldr_occmean_{experiment}.csv'), index_col=0, squeeze=True)
-    y_ldr_occp95 = pd.read_csv(Path(input_path, f'y_ldr_occp95_{experiment}.csv'), index_col=0, squeeze=True)
+    y_ldr_occmean = pd.read_csv(Path(input_path, f'y_ldr_occmean_{experiment}.csv'), index_col=0).squeeze("columns")
+    y_ldr_occp95 = pd.read_csv(Path(input_path, f'y_ldr_occp95_{experiment}.csv'), index_col=0).squeeze("columns")
     y_ldr_probblocked = \
-        pd.read_csv(Path(input_path, f'y_ldr_probblocked_{experiment}.csv'), index_col=0, squeeze=True)
+        pd.read_csv(Path(input_path, f'y_ldr_probblocked_{experiment}.csv'), index_col=0).squeeze("columns")
     y_ldr_condmeantimeblocked = \
-        pd.read_csv(Path(input_path, f'y_ldr_condmeantimeblocked_{experiment}.csv'), index_col=0, squeeze=True)
+        pd.read_csv(Path(input_path, f'y_ldr_condmeantimeblocked_{experiment}.csv'), index_col=0).squeeze("columns")
 
     # Fit models
 
@@ -579,7 +579,7 @@ def main(argv=None):
 
     # fit models
     fit_models(args.experiment,
-               Path(args.input_path), Path(args.output_path), Path(args.plot_path))
+               Path(args.input_path), Path(args.output_path), Path(args.plots_path))
 
     return 0
 

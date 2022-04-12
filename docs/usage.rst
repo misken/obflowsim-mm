@@ -8,6 +8,7 @@ Setting up and running a multiscenario simulation experiment
 The main steps are:
 
 * Create the scenario input file (``scenario_tools``)
+* Create the run settings file
 * Generate simulation config file and for each scenario and shell scripts to run the scenarios (``create_configs``)
 * Run the shell scripts to run the simulation scenarios (``obflow_sim``)
 * Concatenate the scenario rep files into one big scenario rep file(``obflow_io``)
@@ -76,7 +77,11 @@ Assume you've create a scenario recipe file named `exp14_scenario_recipe.yaml`. 
 will generate the simulation scenario input file named `exp14_obflowsim_scenario_inputs.csv` in
 the `.inputs/exp14/` directory. Now we are ready to generate the configuration files for
 each simulation scenario.
-    
+
+Create run settings file and setup directory structure
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
 Generate simulation config file for each scenario
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -87,9 +92,9 @@ The ``create_configs.py`` module does two main things:
 
 .. code::
 
-    create_configs [-h] [--update_rho_checks]
-                          exp scenario_inputs_file_path sim_settings_file_path
-                          configs_path run_script_path run_script_chunk_size
+    usage: create_configs [-h] [--chunk_size CHUNK_SIZE] [--update_rho_checks]
+                      exp scenario_inputs_file_path sim_settings_file_path
+                      configs_path run_script_path
 
 For example,
 
@@ -98,7 +103,7 @@ For example,
     create_configs exp14 \
         input/exp14/exp14_obflowsim_scenario_inputs.csv \
         input/exp14/exp14_obflowsim_settings.yaml \
-        input/exp14/config run/exp14 500
+        input/exp14/config run/exp14 --chunk_size 500 --update_rho_checks
                       
 Generate shell scripts to run the simulation scenarios
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

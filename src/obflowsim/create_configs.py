@@ -234,7 +234,7 @@ def main(argv=None):
                                                           args.run_script_path, args.update_rho)
 
     if args.chunk_size:
-        create_run_script_chunks(run_script_file_path, args.run_script_chunk_size)
+        create_run_script_chunks(run_script_file_path, args.chunk_size)
 
 
 if __name__ == '__main__':

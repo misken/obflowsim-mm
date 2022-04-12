@@ -9,7 +9,7 @@ import json
 import yaml
 
 from qng import qng
-from mm.mm_dataprep import qng_approx_from_inputs
+from obflowsim.mm.mm_dataprep import qng_approx_from_inputs
 
 
 def scenario_grid_to_csv(scenario_recipe_yaml_file, _csv_output_file_path):

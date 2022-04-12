@@ -10,8 +10,8 @@ import simpy
 from numpy.random import default_rng
 import networkx as nx
 
-import obflow_io as obio
-import obflow_stat as obstat
+import obflowsim.obflow_io as obio
+import obflowsim.obflow_stat as obstat
 
 """
 Basic OB patient flow model

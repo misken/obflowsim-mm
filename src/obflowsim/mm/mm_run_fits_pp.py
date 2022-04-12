@@ -42,8 +42,8 @@ def fit_models(experiment, input_path, output_path, figures_path):
     X_pp_occp95_onlyq = pd.read_csv(Path(input_path, f'X_pp_occp95_onlyq_{experiment}.csv'), index_col=0)
 
     # y vectors
-    y_pp_occmean = pd.read_csv(Path(input_path, f'y_pp_occmean_{experiment}.csv'), index_col=0, squeeze=True)
-    y_pp_occp95 = pd.read_csv(Path(input_path, f'y_pp_occp95_{experiment}.csv'), index_col=0, squeeze=True)
+    y_pp_occmean = pd.read_csv(Path(input_path, f'y_pp_occmean_{experiment}.csv'), index_col=0).squeeze("columns")
+    y_pp_occp95 = pd.read_csv(Path(input_path, f'y_pp_occp95_{experiment}.csv'), index_col=0).squeeze("columns")
 
     # Fit models
 
@@ -264,7 +264,7 @@ def main(argv=None):
 
     # fit models
     fit_models(args.experiment,
-               Path(args.input_path), Path(args.output_path), Path(args.plot_path))
+               Path(args.input_path), Path(args.output_path), Path(args.plots_path))
 
     return 0
 

@@ -46,13 +46,13 @@ def fit_models(experiment, input_path, output_path, figures_path):
         pd.read_csv(Path(input_path, f'X_obs_condmeantimeblocked_onlyq_{experiment}.csv'), index_col=0)
 
     # y vectors
-    y_obs_occmean = pd.read_csv(Path(input_path, f'y_obs_occmean_{experiment}.csv'), index_col=0, squeeze=True)
-    y_obs_occp95 = pd.read_csv(Path(input_path, f'y_obs_occp95_{experiment}.csv'), index_col=0, squeeze=True)
+    y_obs_occmean = pd.read_csv(Path(input_path, f'y_obs_occmean_{experiment}.csv'), index_col=0).squeeze("columns")
+    y_obs_occp95 = pd.read_csv(Path(input_path, f'y_obs_occp95_{experiment}.csv'), index_col=0).squeeze("columns")
     y_obs_probblocked = pd.read_csv(Path(input_path,
-                                                 f'y_obs_probblocked_{experiment}.csv'), index_col=0, squeeze=True)
+                                                 f'y_obs_probblocked_{experiment}.csv'), index_col=0).squeeze("columns")
     y_obs_condmeantimeblocked = pd.read_csv(Path(input_path,
                                                    f'y_obs_condmeantimeblocked_{experiment}.csv'),
-                                              index_col=0, squeeze=True)
+                                              index_col=0).squeeze("columns")
 
     # Queueing models
 
@@ -627,7 +627,7 @@ def main(argv=None):
 
     # fit models
     fit_models(args.experiment,
-               Path(args.input_path), Path(args.output_path), Path(args.plot_path))
+               Path(args.input_path), Path(args.output_path), Path(args.plots_path))
 
     return 0
 

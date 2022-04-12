@@ -256,7 +256,7 @@ def qng_approx_from_inputs(scenario_inputs_summary):
     return results_df
 
 
-def process_command_line():
+def process_command_line(argv=None):
     """
     Parse command line arguments
 
