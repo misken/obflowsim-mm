@@ -2,13 +2,15 @@
 Usage
 =====
 
+.. highlight:: bash
+
 Setting up and running a multiscenario simulation experiment
 -------------------------------------------------------------
 
 The main steps are:
 
 * Create the scenario input file (``scenario_tools``)
-* Create the run settings file
+* Create the run settings file (manually for now)
 * Generate simulation config file and for each scenario and shell scripts to run the scenarios (``create_configs``)
 * Run the shell scripts to run the simulation scenarios (``obflow_sim``)
 * Concatenate the scenario rep files into one big scenario rep file(``obflow_io``)
@@ -17,7 +19,12 @@ The main steps are:
 The input output summary file created after this final step
 is ready to use in metamodel fitting and evaluation. The summary file
 contains simulation inputs, outputs, and queueing approximations for
-each scenario run.
+each scenario run. The main metamodeling steps are:
+
+* Create the X and y matrices for metamodel fitting (``mm_dataprep``)
+* Fit models (``mm_run_fits_obs``, ``mm_run_fits_ldr``, and ``mm_run_fits_pp``)
+* Postprocess the fitted models (``mm_process_fitted_models``)
+* Generate performance curves from fitted models (``mm_performance_curves``)
 
 
 Create the scenario input file
@@ -64,23 +71,24 @@ parameters. Here is an example:
 
 A few important things to note:
 
-* The recipe file can be created manually or via the code in `scenario_scratchpad.py`. 
-* The `acc_obs`, `acc_ldr`, and `acc_pp` accommodation probabilities lead to capacity lower bounds
+* The recipe file can be created manually or via the code in ``scenario_scratchpad.py``.
+* The ``acc_obs``, ``acc_ldr``, and ``acc_pp`` accommodation probabilities lead to capacity lower bounds
 based on an inverse Poisson approach. You can also directly specify `cap_obs`, `cap_ldr`,
-and `cap_pp` capacity levels.
+and ``cap_pp`` capacity levels.
 
-Assume you've create a scenario recipe file named `exp14_scenario_recipe.yaml`. Calling
+Assume you've create a scenario recipe file named ``exp14_scenario_recipe.yaml``. Calling
 
 .. code::
     scenario_tools exp14 input/exp14/exp14_scenario_recipe.yaml -i input/exp14/
     
-will generate the simulation scenario input file named `exp14_obflowsim_scenario_inputs.csv` in
-the `.inputs/exp14/` directory. Now we are ready to generate the configuration files for
+will generate the simulation scenario input file named ``exp14_obflowsim_scenario_inputs.csv`` in
+the ``.inputs/exp14/`` directory. Now we are ready to generate the configuration files for
 each simulation scenario.
 
 Create run settings file and setup directory structure
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+TODO
 
 Generate simulation config file for each scenario
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -104,6 +112,9 @@ For example,
         input/exp14/exp14_obflowsim_scenario_inputs.csv \
         input/exp14/exp14_obflowsim_settings.yaml \
         input/exp14/config run/exp14 --chunk_size 500 --update_rho_checks
+
+Set ``--update_rho_checks`` if you manually set capacity levels in the scenario inputs file. This
+will help you detect scenarios with insufficient capacity (i.e. $\rho > 1$).
                       
 Generate shell scripts to run the simulation scenarios
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -111,14 +122,42 @@ Generate shell scripts to run the simulation scenarios
 As mentioned in the previous step, ``create_configs.py`` creates the
 shell scripts containing the commands to run the simulation scenarios. 
 In order to take advantage of multiple CPUs, we can specify a 
-``run_script_chunk_size`` parameter to break up the runs into multiple
+``--chunk_size`` parameter to break up the runs into multiple
 scripts - each of which can be launched separately. It's a crude form
 of parallel processing.
 
 Run the shell scripts to run the simulation scenarios
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A single scenario can be run by using ``obflow_sim``. For
+A single scenario can be run by using ``obflow_sim``.
+
+.. code::
+    usage: obflow_io [-h] stop_summaries_path output_path summary_stats_file_stem output_file_stem
+
+    Run inpatient OB simulation
+
+    positional arguments:
+      stop_summaries_path   Folder containing the scenario rep summaries created by simulation runs
+      output_path           Destination folder for combined scenario rep summary csv
+      summary_stats_file_stem
+                            Summary stat file name without extension
+      output_file_stem      Combined summary stat file name without extension to be output
+
+    optional arguments:
+      -h, --help            show this help message and exit
+    (obflowsim) mark@quercus:~/Documents/research/OBsim/mm_interpet/rerun25$ obflow_sim -h
+    usage: obflow_6 [-h] [--loglevel LOGLEVEL] config
+
+    Run inpatient OB simulation
+
+    positional arguments:
+      config               Configuration file containing input parameter arguments and values
+
+    optional arguments:
+      -h, --help           show this help message and exit
+      --loglevel LOGLEVEL  Use valid values for logging package
+
+
 
 .. code::
     obflow_sim input/exp14/config/exp14_scenario_1.yaml
@@ -131,15 +170,26 @@ single scenario command lines.
     sh ./run/exp14/exp14_run.sh
 
  
-Run ``obflow_io`` to concatenate the scenario rep files
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Run ``obflow_io`` to concatenate the scenario replication files
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This will create the main output summary file with one row per (scenario, rep) pair.
+This will create the main output summary file with one row per (scenario, replication) pair.
 
 .. code::
 
-    obflow_io stop_summaries_path output_path summary_stats_file_stem \
-                     output_file_stem
+    usage: obflow_io [-h] stop_summaries_path output_path summary_stats_file_stem output_file_stem
+
+    create the main output summary file with one row per (scenario, replication) pair
+
+    positional arguments:
+      stop_summaries_path   Folder containing the scenario rep summaries created by simulation runs
+      output_path           Destination folder for combined scenario rep summary csv
+      summary_stats_file_stem
+                            Summary stat file name without extension
+      output_file_stem      Combined summary stat file name without extension to be output
+
+    optional arguments:
+      -h, --help            show this help message and exit
 
     
 .. code::
@@ -172,22 +222,34 @@ be named ``scenario_siminout_{experiment id}.csv``. Continuing our example, the 
 file is ``scenario_siminout_exp14.csv``
 
 
-
-
-
 Fitting and evaluation of simulation metamodels
 -------------------------------------------------------------
 
 The main steps in fitting metamodels are:
 
-* Generate the X and y matrix data files from the simulation input output summary file. (mm_dataprep.py)
-* Run the metamodel fits for OBS, LDR and PP (mm_run_fits_{unit}.py)
-    - still need to add a CLI to these (added on 2022-02-25)
+* Generate the X and y matrix data files from the simulation input output summary file. (``mm_dataprep``)
+* Run the metamodel fits for OBS, LDR and PP (``mm_run_fits_{unit}``)
     - output includes metrics summary csv, actual vs predicted plots and coefficient plots
-* Further output analysis (ongoing work)
+* Generate performance curves (``mm_performance_curves``)
 
 Generate the X and y matrix data files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The specific columns (independent variables) in the ``X`` matrices and ``y`` target vectors are driven by the
+project design and goals. See ``mm_dataprep.py``.
+
+.. code::
+    usage: mm_dataprep [-h] experiment siminout_qng_path output_data_path
+
+    Create X and y files for metamodeling
+
+    positional arguments:
+      experiment         String used in output filenames
+      siminout_qng_path  Path to csv file which will contain scenario inputs, summary stats and qng approximations
+      output_data_path   Path to directory in which to create X and y data files
+
+    optional arguments:
+      -h, --help         show this help message and exit
 
 .. code::
 
@@ -196,19 +258,119 @@ Generate the X and y matrix data files
 Metamodel fitting
 ^^^^^^^^^^^^^^^^^^^^^^
 
+See ``mm_run_fits_obs.py``, ``mm_run_fits_ldr.py``, and ``mm_run_fits_pp.py`` for details. The core
+model fitting procedure is part of ``mm_fitting.py``.
+
 .. code::
 
     mm_run_fits_obs mmdata/exp14/ mmoutput/exp14/ mmoutput/exp14/plots/
     mm_run_fits_ldr mmdata/exp14/ mmoutput/exp14/ mmoutput/exp14/plots/
     mm_run_fits_pp mmdata/exp14/ mmoutput/exp14/ mmoutput/exp14/plots/
 
-The output includes a pickle file containing detailed model fitting results. See code.
-Predicted vs. actual plots as well as coefficient plots are also created.
+The output includes a pickle file containing detailed model fitting results.
+Predicted vs. actual plots as well as coefficient plots are also created. Here's
+what the pickled dictionary looks like (with comments). Notice that some
+items might not be applicable for all model flavors. For example, random forest
+models do not have coefficient values.
+
+.. code-block:: python
+    results = {'unit_pm_qdata_model': unit_pm_qdata_model, # Composite identifier
+                       'measure': measure, # str: performance measure
+                       'flavor': flavor,   # str: model flavor
+                       'unit': unit,       # str: hospital unit
+                       'var_names': var_names, # list: column names of predictors
+                       'model': model_final,   # sklearn model: final fitted model
+                       'qdata' : qdata,        # str: level of queueing inputs
+                       'cv': cv_iterator,      # sklearn cv iterator: cv details
+                       'coeffs_df': unscaled_coeffs_df, # dataframe: unscaled coeffs (if applicable)
+                       'metrics_df': metrics_df,        # dataframe: metrics by fold
+                       'scaling': scaling_factors,      # numpy array: scaling factors for X
+                       'scaled_coeffs_df': coeffs_df,   # dataframe: scaled coeffs (if applicable)
+                       'alphas': alphas,       # numpy array: penalization values for lassocv
+                       'predictions': predictions, # numpy array: predicted values on leave out observations
+                       'residuals': residuals,     # numpy array: predicted - actual on leave out observations
+                       'fitplot': fig_scatter,     # matplotlib Figure: scatter pred vs act
+                       'coefplot': fig_coeffs}     # matplotlib Figure: coefficients by fold (if applicable)
 
 Generating and evaluation of performance curves
 -----------------------------------------------
 
 Now that we have some good performing metamodels, we can use them to do things like generate
-performance curves. The main steps are:
+performance curves.
 
-* Generation and evaluation of performance curves (ongoing work)
+.. code::
+    usage: mm_performance_curves [-h]
+                                 mm_experiment predict_experiment scenario_input_path_filename pkl_path X_data_path
+                                 output_path
+
+    Generate predictions from fitted models
+
+    positional arguments:
+      mm_experiment         Experiment used to fit metamodels
+      predict_experiment    Experiment for which to predict
+      scenario_input_path_filename
+                            Path to csv file which contains scenario inputs
+      pkl_path              Path containing pkl files created from metamodel fitting
+      X_data_path           Path to directory in which to write X data for predictions
+      output_path           Path to write output csv files
+
+    optional arguments:
+      -h, --help            show this help message and exit
+
+In the example below, we are using models fitted in ``exp14`` to make predictions
+for scenarios in ``exp15``.
+
+.. code::
+
+    # Generate scenario input file
+    scenario_tools exp15 input/exp15/exp15_scenario_recipe.yaml -i input/exp15/
+
+    # Generate performance curves
+    mm_performance_curves exp14 exp15 \
+        mm_input/exp15/exp15_obflowsim_scenario_inputs.csv \
+        mm_output/exp14 \
+        mm_input/exp14 \
+        mm_output/exp15
+
+If we want to assess the accuracy of these predictions, we just need to run the simulation
+model for the scenarios in ``exp15``.
+
+.. code::
+    # Create config files and scripts for running simulations
+    create_configs exp15 \
+    input/exp15/exp15_obflowsim_scenario_inputs.csv \
+    input/exp15/exp15_obflowsim_settings.yaml \
+    input/exp15/config . --update_rho_checks
+    # Run simulations
+    sh ./exp15_run.sh
+    # Combine scenario specific output files
+    obflow_io output/exp15/stats/ output/exp15/ summary_stats_scenario exp15_scenario_rep_simout
+    # Compute aggregated (over replications) output stats
+    obflow_stat output/exp15/exp15_scenario_rep_simout.csv output/exp15 exp15 --include_inputs --scenario_inputs_path input/exp15/exp15_obflowsim_scenario_inputs.csv
+
+To facilitate comparing of predicted vs actual values for the new scenarios, we can combine the
+simulation output with the metamodel predictions using ``mm_merge_predict_simulated``.
+
+.. code::
+    usage: mm_merge_predict_simulated [-h] experiment perf_curve_pred_filename y_data_path output_filename
+
+    merge simulation scenario output with mm predictions
+
+    positional arguments:
+      experiment            String used in output filenames
+      perf_curve_pred_filename
+                            Path to csv file which contains predictions
+      y_data_path           Path to directory containing y data files (which are created from sim output)
+      output_filename       Path to merged output csv file
+
+    optional arguments:
+      -h, --help            show this help message and exit
+
+
+
+.. code::
+    # Merge predictions and simulation output
+    mm_merge_predict_simulated exp15 \
+    mm_output/exp15/pc_predictions_exp15_long.csv \
+    mm_input/exp15 \
+    mm_output/exp15/predictions_simulated_exp15_long.csv

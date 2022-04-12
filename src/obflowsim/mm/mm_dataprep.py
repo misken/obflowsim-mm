@@ -265,7 +265,7 @@ def process_command_line(argv=None):
     """
 
     # Create the parser
-    parser = argparse.ArgumentParser(prog='dataprep',
+    parser = argparse.ArgumentParser(prog='mm_dataprep',
                                      description='Create X and y files for metamodeling')
 
     # Add arguments

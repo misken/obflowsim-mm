@@ -149,7 +149,7 @@ def process_command_line(argv=None):
 
     # Create the parser
     parser = argparse.ArgumentParser(prog='obflow_io',
-                                     description='Run inpatient OB simulation')
+                                     description='create the main output summary file with one row per (scenario, replication) pair')
 
     # Add arguments
     parser.add_argument(
