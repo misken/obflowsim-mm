@@ -85,10 +85,18 @@ will generate the simulation scenario input file named ``exp14_obflowsim_scenari
 the ``.inputs/exp14/`` directory. Now we are ready to generate the configuration files for
 each simulation scenario.
 
-Create run settings file and setup directory structure
+Create run settings file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-TODO
+This is another YAML file for specifying simulation settings such as:
+
+- run time, warmup time, and number of replications
+- paths for output files along with indicators of whether or not to write out certain log files
+- random number stream seeds
+- locations and routes through the system (modeled as nodes and arcs consistent with NetworkX package)
+
+Each simulation experiment has one settings file and for now we've just been manually creating them.
+As more work gets done on extending the simulation architecture we may create tools to generate these files in a more automated way.
 
 Generate simulation config file for each scenario
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

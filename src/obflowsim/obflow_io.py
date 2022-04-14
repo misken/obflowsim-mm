@@ -78,6 +78,8 @@ def concat_stop_summaries(stop_summaries_path, output_path,
 
     scenario_rep_summary_df.to_csv(output_csv_file, index=False)
 
+    print(f'Scenario replication csv file written to {output_csv_file}')
+
 
 def write_occ_log(csv_path, occ_df, egress=False):
     """

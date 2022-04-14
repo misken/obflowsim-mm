@@ -512,7 +512,7 @@ def process_command_line(argv=None):
     """
 
     # Create the parser
-    parser = argparse.ArgumentParser(prog='obflow_6',
+    parser = argparse.ArgumentParser(prog='obflowsim',
                                      description='Run inpatient OB simulation')
 
     # Add arguments

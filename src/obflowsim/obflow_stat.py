@@ -409,11 +409,13 @@ def create_sim_summaries(scenario_rep_simout_path, output_path, suffix,
     scenario_siminout_path = output_path / f"{scenario_siminout_stem}.csv"
     scenario_simout_df = aggregate_over_reps(scenario_rep_simout_path, active_units)
     scenario_simout_df.to_csv(scenario_simout_path, index=True)
+    print(f'Output stats by scenario written to {scenario_simout_path}')
 
     # Compute and output confidence intervals
     scenario_ci_df = conf_intervals(scenario_rep_simout_df)
     scenario_ci_path = output_path / f"{scenario_ci_stem}.csv"
     scenario_ci_df.to_csv(scenario_ci_path, index=True)
+    print(f'Output stats confidence intervals written to {scenario_ci_path}')
 
     # Merge the scenario summary with the scenario inputs for both aggregated and raw stats
     if include_inputs:
@@ -423,11 +425,13 @@ def create_sim_summaries(scenario_rep_simout_path, output_path, suffix,
         scenario_simin_df = pd.read_csv(scenario_inputs_path)
         scenario_siminout_df = scenario_simin_df.merge(scenario_simout_df, on=['scenario'])
         scenario_siminout_df.to_csv(scenario_siminout_path, index=False)
+        print(f'Output stats by scenario with inputs merged written to {scenario_siminout_path}')
 
         # Do merge and output for stats by scenario, rep
         scenario_rep_siminout_df = scenario_rep_simout_df.merge(scenario_simin_df, on=['scenario'])
         scenario_rep_siminout_path = output_path / f"{scenario_rep_siminout_stem}.csv"
         scenario_rep_siminout_df.to_csv(scenario_rep_siminout_path, index=False)
+        print(f'Output stats by scenario and rep with inputs merged written to {scenario_rep_siminout_path}')
 
 
 def varsum(df, unit, pm, alpha):

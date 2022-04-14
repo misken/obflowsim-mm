@@ -2,8 +2,10 @@ import sys
 import argparse
 from pathlib import Path
 
+
 import pandas as pd
 import yaml
+
 
 
 def create_configs_from_inputs_csv(exp, scenarios_csv_file_path, simulation_settings_path, config_path,
@@ -30,7 +32,7 @@ def create_configs_from_inputs_csv(exp, scenarios_csv_file_path, simulation_sett
     # Read settings file
     with open(simulation_settings_path, 'rt') as settings_file:
         settings = yaml.safe_load(settings_file)
-        print(settings)
+        #print(settings)
 
     global_vars = {}
     run_script_file_path = Path(run_script_path, f'{exp}_run.sh')
@@ -114,6 +116,7 @@ def create_configs_from_inputs_csv(exp, scenarios_csv_file_path, simulation_sett
             # Rewrite scenarios input file with updated rho_checks
             scenarios_df.to_csv(scenarios_csv_file_path, index=False)
 
+    print(f'Config files written to {Path(config_path)}')
     return run_script_file_path
 
 
