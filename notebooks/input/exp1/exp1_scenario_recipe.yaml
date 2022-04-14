@@ -1,0 +1,36 @@
+arrival_rate:
+- 0.3
+- 0.5
+mean_los_obs:
+- 1.0
+mean_los_ldr:
+- 15.0
+mean_los_csect:
+- 2.0
+mean_los_pp_noc:
+- 24.0
+mean_los_pp_c:
+- 48.0
+c_sect_prob:
+- 0.30
+num_erlang_stages_obs:
+- 1
+num_erlang_stages_ldr:
+- 2
+num_erlang_stages_csect:
+- 1
+num_erlang_stages_pp:
+- 8
+acc_obs:
+- 0.95
+- 0.99995
+acc_ldr:
+- 0.85
+- 0.95
+acc_pp:
+- 0.9
+- 0.95
+
+
+
+

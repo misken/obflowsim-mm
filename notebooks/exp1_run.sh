@@ -1,0 +1,16 @@
+obflow_sim input/exp1/config/exp1_scenario_1.yaml --loglevel=WARNING
+obflow_sim input/exp1/config/exp1_scenario_2.yaml --loglevel=WARNING
+obflow_sim input/exp1/config/exp1_scenario_3.yaml --loglevel=WARNING
+obflow_sim input/exp1/config/exp1_scenario_4.yaml --loglevel=WARNING
+obflow_sim input/exp1/config/exp1_scenario_5.yaml --loglevel=WARNING
+obflow_sim input/exp1/config/exp1_scenario_6.yaml --loglevel=WARNING
+obflow_sim input/exp1/config/exp1_scenario_7.yaml --loglevel=WARNING
+obflow_sim input/exp1/config/exp1_scenario_8.yaml --loglevel=WARNING
+obflow_sim input/exp1/config/exp1_scenario_9.yaml --loglevel=WARNING
+obflow_sim input/exp1/config/exp1_scenario_10.yaml --loglevel=WARNING
+obflow_sim input/exp1/config/exp1_scenario_11.yaml --loglevel=WARNING
+obflow_sim input/exp1/config/exp1_scenario_12.yaml --loglevel=WARNING
+obflow_sim input/exp1/config/exp1_scenario_13.yaml --loglevel=WARNING
+obflow_sim input/exp1/config/exp1_scenario_14.yaml --loglevel=WARNING
+obflow_sim input/exp1/config/exp1_scenario_15.yaml --loglevel=WARNING
+obflow_sim input/exp1/config/exp1_scenario_16.yaml --loglevel=WARNING

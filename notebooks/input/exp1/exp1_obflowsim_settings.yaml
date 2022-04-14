@@ -1,0 +1,83 @@
+run_settings:
+  run_time: 9600
+  warmup_time: 2400
+  num_replications: 15
+
+output:
+  summary_stats: 
+      path: ./output/exp1/stats
+      write: 1
+  occ_stats: 
+      path: ./output/exp1/stats
+      write: 1
+  stop_logs: 
+      path: ./output/exp1/logs
+      write: 0
+  occ_logs: 
+      path: ./output/exp1/logs
+      write: 0
+
+random_number_streams:
+  arrivals: 25
+  los: 31
+
+locations:
+  0:
+    id: 0
+    name: ENTRY
+    capacity: 1000
+  1:
+    id: 1
+    name: OBS
+    capacity: 1000
+  2:
+    id: 2
+    name: LDR
+    capacity: 1000
+  3:
+    id: 3
+    name: CSECT
+    capacity: 1000
+  4:
+    id: 4
+    name: PP
+    capacity: 1000
+  5:
+    id: 5
+    name: EXIT
+    capacity: 1000
+
+routes:
+  1:
+    id: 1
+    edges:
+      - id: 0
+        from: 0
+        to: 1
+      - id: 1
+        from: 1
+        to: 2
+      - id: 2
+        from: 2
+        to: 4
+      - id: 3
+        from: 4
+        to: 5
+  2:
+    id: 2
+    edges:
+      - id: 0
+        from: 0
+        to: 1
+      - id: 1
+        from: 1
+        to: 2
+      - id: 2
+        from: 2
+        to: 3
+      - id: 3
+        from: 3
+        to: 4
+      - id: 4
+        from: 4
+        to: 5
