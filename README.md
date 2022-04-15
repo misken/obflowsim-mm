@@ -9,12 +9,12 @@ input and output data processing including fitting of metamodels.
 The 
 obflowsim package was developed as part of a research project involving
 comparison of simulation metamodeling methods and the impact of feature
-engineering on metamodel accuracy. We are making this repository public
+engineering on metamodel accuracy and explainability. We are making this repository public
 so that anyone can reproduce our results and to provide full
 transparency as to how the simulation model works and the metamodels
 were fit.
 
-The following blog posts we did provide some background on simulation with SimPy
+The following blog posts I have done over the past few years provide some background on simulation with SimPy
 and building simulation metamodels for this patient flow network.
 
 - [Getting started with SimPy for patient flow modeling](https://misken.github.io/blog/simpy-getting-started/)
