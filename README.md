@@ -46,7 +46,7 @@ Pip install `obflowsim` using the `pip` executable installed in the
     
 ## Explore the explainer notebook
 
-There's a Jupyter notebook named `explainer_notebook.ipynb` in the
+There's a Jupyter notebook named `obflowsim_explainer.ipynb` in the
 `notebooks` folder. It walks through all the steps of running a simulation
 experiment and fitting metamodels from the simulation output.
 
