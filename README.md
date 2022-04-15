@@ -34,14 +34,20 @@ Clone the obflowsim project.
 
     $ git clone git@github.com:misken/obflowsim.git
     
-At the command line from the obflowsim directory:
+Create a conda virtual env using the `obflowsim.yml` file.
 
-    $ pip install -e .
+    $ conda env create -f obflowsim.yml
+    $ conda activate obflowsim
+    
+Pip install `obflowsim` using the `pip` executable installed in the 
+`obflowsim` conda virtual environment.
+
+    $ $CONDA_PREFIX/bin/pip install -e .
     
 ## Explore the explainer notebook
 
 There's a Jupyter notebook named `explainer_notebook.ipynb` in the
-`notebook` folder. It walks through all the steps of running a simulation
+`notebooks` folder. It walks through all the steps of running a simulation
 experiment and fitting metamodels from the simulation output.
 
 ## Reproduce the analysis done for the paper
