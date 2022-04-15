@@ -1,5 +1,5 @@
-obflowsim
-==============================
+# obflowsim - a research project
+
 
 The obflowsim Python package is a discrete event simulation model built with
 SimPy of a very simple inpatient obstetrical patient flow network. In
@@ -23,15 +23,12 @@ and building simulation metamodels for this patient flow network.
 - [Comparing predictive model performance using caret - Part 2: A simple caret automation function](https://misken.github.io/blog/obsim_caret_part2/)
 - [Comparing predictive model performance using caret - Part 3: Put it all together](https://misken.github.io/blog/obsim_caret_part3/)
 
-Exploring the project
----------------------
 
-You you want to explore the code in this project and/or rerun any
+If you want to explore the code in this project and/or rerun any
 of the analysis that led to the results presented in our paper, there
 are a few steps. 
 
-Getting and installing obflowsim
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+## Getting and installing obflowsim
 
 Clone the obflowsim project.
 
@@ -41,15 +38,13 @@ At the command line from the obflowsim directory:
 
     $ pip install -e .
     
-Explore the explainer notebook
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+## Explore the explainer notebook
 
 There's a Jupyter notebook named `explainer_notebook.ipynb` in the
 `notebook` folder. It walks through all the steps of running a simulation
 experiment and fitting metamodels from the simulation output.
 
-Reproduce the analysis done for the paper
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+## Reproduce the analysis done for the paper
 
 In the `run_paper_experiments` folder you'll find (among other things)
 three "pipeline" bash shell scripts:
