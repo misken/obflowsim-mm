@@ -4,10 +4,15 @@ obflowsim
 The obflowsim Python package is a discrete event simulation model built with
 SimPy of a very simple inpatient obstetrical patient flow network. In
 addition to the DES model there are modules for related simulation
-input and output data processing including fitting of metamodels. The 
+input and output data processing including fitting of metamodels. 
+
+The 
 obflowsim package was developed as part of a research project involving
 comparison of simulation metamodeling methods and the impact of feature
-engineering on metamodel accuracy.
+engineering on metamodel accuracy. We are making this repository public
+so that anyone can reproduce our results and to provide full
+transparency as to how the simulation model works and the metamodels
+were fit.
 
 The following blog posts we did provide some background on simulation with SimPy
 and building simulation metamodels for this patient flow network.
@@ -18,8 +23,87 @@ and building simulation metamodels for this patient flow network.
 - [Comparing predictive model performance using caret - Part 2: A simple caret automation function](https://misken.github.io/blog/obsim_caret_part2/)
 - [Comparing predictive model performance using caret - Part 3: Put it all together](https://misken.github.io/blog/obsim_caret_part3/)
 
-Project Organization
---------------------
+Exploring the project
+---------------------
+
+You you want to explore the code in this project and/or rerun any
+of the analysis that led to the results presented in our paper, there
+are a few steps. 
+
+Getting and installing obflowsim
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Clone the obflowsim project.
+
+    $ git clone git@github.com:misken/obflowsim.git
+    
+At the command line from the obflowsim directory:
+
+    $ pip install -e .
+    
+Explore the explainer notebook
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+There's a Jupyter notebook named `explainer_notebook.ipynb` in the
+`notebook` folder. It walks through all the steps of running a simulation
+experiment and fitting metamodels from the simulation output.
+
+Reproduce the analysis done for the paper
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In the `run_paper_experiments` folder you'll find (among other things)
+three "pipeline" bash shell scripts:
+
+- `exp11b_pipeline.sh` - runs the experiment referred to as EXP1 in our paper,
+- `exp13b_pipeline.sh` - runs the experiment referred to as EXP2 in our paper,
+- `exp16b_pipeline.sh` - runs the experiment referred to as EXP3 in our paper.
+
+**NOTE** These experiments take quite a while to run. See the comments
+in the pipeline scripts. For example, `exp13b_pipeline.sh` involves
+over 3000 simulation scenarios (each replicated 25 times) and the
+total run time is probably 10-20 hours depending on the number of CPUs used.
+
+The scripts are commented and all of the folder structure needed for running
+the scripts has already been set up.
+
+        ├── input
+        │   ├── exp11b
+        │   │   ├── config
+        │   │   │   └── README.md
+        │   │   ├── exp11b_obflowsim_settings.yaml
+        │   │   └── exp11b_scenario_recipe.yaml
+        │   ├── exp13b
+        │   │   ├── config
+        │   │   │   └── README.md
+        │   │   ├── exp13b_obflowsim_settings.yaml
+        │   │   └── exp13b_scenario_recipe.yaml
+        │   └── exp16b
+        │       ├── config
+        │       │   └── README.md
+        │       ├── exp16b_obflowsim_settings.yaml
+        │       └── exp16b_scenario_recipe.yaml
+        ├── make_diff_plots.R
+        ├── make_plots.R
+        ├── mm_input
+        │   ├── exp11b
+        │   │   └── README.md
+        │   ├── exp13b
+        │   │   └── README.md
+        │   └── exp16b
+        │       └── README.md
+        ├── mm_output
+        │   ├── exp11b
+        │   │   └── plots
+        │   │       └── README.md
+        │   ├── exp13b
+        │   │   └── plots
+        │   │       └── README.md
+        │   └── exp16b
+        │       └── plots
+        │           └── README.md
+        ├── new_exp.sh
+        └── output
+
 
 
 

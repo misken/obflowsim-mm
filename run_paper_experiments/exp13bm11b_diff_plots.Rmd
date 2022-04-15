@@ -1,0 +1,298 @@
+---
+title: "exp13bm11b_diff_plots"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(forcats)
+```
+
+```{r}
+source("./make_diff_plots.R")
+source("./make_paper_plots.R")
+```
+
+# Effect of larger scenario space
+
+This file creates plots of error diffs in exp13b vs exp11b on test data.
+Since exp13b has more scenarios, we'd expect lower test errors (perhaps) and
+the differences are exp13b - exp11b.
+
+
+# exp11b vs exp13b
+
+Is predictive accuracy impacted by the scenario grid size? I would think that
+errors should be smaller for exp13b (larger scenario grid used to fit models.)
+
+## Load results
+
+```{r read_results}
+exp11b_ldr_metrics <- read.csv("mm_output/exp11b/exp11b_ldr_metrics.csv", stringsAsFactors = TRUE)
+exp11b_pp_metrics <- read.csv("mm_output/exp11b/exp11b_pp_metrics.csv", stringsAsFactors = TRUE)
+exp11b_obs_metrics <- read.csv("mm_output/exp11b/exp11b_obs_metrics.csv", stringsAsFactors = TRUE)
+
+exp13b_ldr_metrics <- read.csv("mm_output/exp13b/exp13b_ldr_metrics.csv", stringsAsFactors = TRUE)
+exp13b_pp_metrics <- read.csv("mm_output/exp13b/exp13b_pp_metrics.csv", stringsAsFactors = TRUE)
+exp13b_obs_metrics <- read.csv("mm_output/exp13b/exp13b_obs_metrics.csv", stringsAsFactors = TRUE)
+
+# Combine
+exp11b_metrics <- rbind(exp11b_ldr_metrics, exp11b_pp_metrics, exp11b_obs_metrics)
+exp11b_metrics$exp <- 'exp11b'
+
+exp13b_metrics <- rbind(exp13b_ldr_metrics, exp13b_pp_metrics, exp13b_obs_metrics)
+exp13b_metrics$exp <- 'exp13b'
+
+metrics <- rbind(exp11b_metrics, exp13b_metrics)
+
+rm(exp11b_ldr_metrics, exp13b_ldr_metrics)
+rm(exp11b_pp_metrics, exp13b_pp_metrics)
+rm(exp11b_obs_metrics, exp13b_obs_metrics)
+rm(exp11b_metrics, exp13b_metrics)
+```
+
+## Recode factors
+
+```{r}
+metrics$model <- recode_factor(metrics$model, 
+                                      lassocv="LASSO",
+                                      lm="LM",
+                                      poly="POLY",
+                                      rf="RF",
+                                      nn="NNET",
+                                      svr="SVR")
+
+
+metrics$measure_nice <- recode_factor(metrics$measure, 
+                                      occmean="mean occupancy",
+                                      occp95="95%ile occupancy",
+                                      probblocked="probability blocked",
+                                      condmeantimeblocked="conditional mean time blocked")
+
+metrics$unit_nice <- recode_factor(metrics$unit, 
+                                      obs="Observation",
+                                      ldr="LDR",
+                                      pp="Postpartum"
+                                      )
+
+metrics$qdata_nice <- recode_factor(metrics$qdata, 
+                                      noq="None",
+                                      basicq="Basic",
+                                      q="Advanced"
+                                      )
+```
+
+
+
+
+## Aggregated performance over folds
+
+To start, let's look at aggregated model performance over the 5 folds of the k-crossfold
+validation process. A few notes:
+
+* filtered out the pure queueing approximations for now (i.e. I'm only included fitted models)
+* for occupancy statistics and conditional mean wait time we use MAPE
+* for probability of blocking we use MAE (more relevant and easier to interpret)
+
+### Overall aggregation
+
+```{r aggregation}
+metrics_agg <- metrics %>% 
+  group_by(exp, unit, unit_nice, measure, measure_nice, qdata, model) %>% 
+  summarize(
+    train_mape = mean(train_mean_absolute_percentage_error),
+    test_mape = mean(test_mean_absolute_percentage_error),
+    train_mae = mean(train_mean_absolute_error),
+    test_mae = mean(test_mean_absolute_error)
+    
+  )
+```
+
+## Compute differences
+
+Now we need to split this dataframe back out into exp11b and exp13b versions to make it easy to subtract the 
+error metrics.
+
+```{r}
+exp11b_metrics_agg <- metrics_agg %>% 
+  filter(exp == 'exp11b')
+
+exp13b_metrics_agg <- metrics_agg %>% 
+  filter(exp == 'exp13b')
+```
+
+Now join the two identically structured tables.
+
+
+```{r}
+exp11b_exp13b_metrics_agg <- exp11b_metrics_agg %>% inner_join(exp13b_metrics_agg, by = c('unit', 'unit_nice', 'measure', 'measure_nice', 'qdata', 'model'),
+                                 suffix = c('11', '13'))
+```
+
+Compute difference for mape
+
+```{r}
+exp11b_exp13b_metrics_agg <- exp11b_exp13b_metrics_agg %>% 
+  mutate(
+    test_mape_diff = test_mape13 - test_mape11,
+    test_mae_diff = test_mae13 - test_mae11,
+    train_mape_diff = train_mape13 - train_mape11,
+    train_mae_diff = train_mae13 - train_mae11
+  )
+```
+
+## Tables of sample size effect
+
+```{r}
+exp11b_exp13b_metrics_agg %>% 
+  filter(measure == 'occmean') %>% 
+  pivot_wider(names_from = model, values_from = test_mape_diff)
+```
+
+
+
+## Plots of sample size effect
+
+Test manual plot
+
+```{r ldr_occmean_mape}
+plt_ldr_occmean_mape_diff <- exp11b_exp13b_metrics_agg %>% 
+  filter(unit == 'ldr',
+         qdata != 'onlyq', 
+         model %in% c('LASSO', 'LM', 'POLY', 'NNET', 'RF', 'SVR'),
+         measure == 'occmean') %>% 
+  ggplot() +
+  geom_point(aes(x=model, y=test_mape_diff, color=qdata, shape=qdata), 
+             size=4) +
+  labs(
+    title = "LDR - mean occupancy",
+    subtitle = "Impact of larger scenario grid",
+    caption = NULL,
+    tag = NULL,
+    x = "Model type",
+    y = "Change in MAPE",
+    colour = "Feature set",
+  ) + 
+    scale_colour_discrete(name  ="Queueing features",
+                            breaks=c("noq", "basicq", "q"),
+                            labels=c("None", "Basic", "Advanced")) +
+    scale_shape_discrete(name  ="Queueing features",
+                           breaks=c("noq", "basicq", "q"),
+                            labels=c("None", "Basic", "Advanced")) + 
+    theme_bw() +
+    theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))
+
+plt_ldr_occmean_mape_diff
+ggsave('mm_output/diff_plots/plt_ldr_occmean_mape_diff.png')
+```
+### LDR
+
+```{r ldr_plots}
+which_unit <- 'ldr'
+which_subtitle <- ''
+
+plot_height <- 4
+plot_width <- 6
+
+plt_ldr_occmean_mape_diff <- mm_paper_error_diff_plot(exp11b_exp13b_metrics_agg, unit = which_unit,
+                                       measure = 'occmean', error = 'mape',
+                                       title = 'LDR - mean occupancy',
+                                       subtitle = which_subtitle)
+
+ggsave(plt_ldr_occmean_mape_diff, filename = 'mm_output/diff_plots/exp13b_ldr_occmean_mape_diff.png',
+       height = plot_height, width = plot_width)
+
+plt_ldr_occp95_mape_diff <- mm_paper_error_diff_plot(exp11b_exp13b_metrics_agg, unit = which_unit,
+                                      measure = 'occp95', error = 'mape',
+                                      title = 'LDR - 95%ile occupancy',
+                                      subtitle = which_subtitle)
+ggsave(plt_ldr_occp95_mape_diff, filename = 'mm_output/diff_plots/exp13b_ldr_occp95_mape_diff.png',
+       height = plot_height, width = plot_width)
+
+plt_ldr_probblocked_mae_diff <- mm_paper_error_diff_plot(exp11b_exp13b_metrics_agg, unit = which_unit,
+                                       measure = 'probblocked', error = 'mae',
+                                       title = 'LDR - probability blocked',
+                                       subtitle = which_subtitle)
+ggsave(plt_ldr_probblocked_mae_diff, filename = 'mm_output/diff_plots/exp13b_ldr_probblocked_mae_diff.png',
+       height = plot_height, width = plot_width)
+
+plt_ldr_condmeantimeblocked_mape_diff <- mm_paper_error_diff_plot(exp11b_exp13b_metrics_agg, unit = which_unit,
+                                      measure = 'condmeantimeblocked', error = 'mape',
+                                      title = 'LDR - conditional mean time blocked',
+                                      subtitle = which_subtitle)
+ggsave(plt_ldr_condmeantimeblocked_mape_diff, filename = 'mm_output/diff_plots/exp13b_ldr_condmeantimeblocked_mape_diff.png',
+       height = plot_height, width = plot_width)
+```
+
+## PP
+
+```{r pp_plots}
+which_unit <- 'pp'
+which_subtitle <- 'Impact of larger scenario grid'
+
+plot_height <- 4
+plot_width <- 6
+
+plt_pp_occmean_mape_diff <- mm_paper_error_diff_plot(exp11b_exp13b_metrics_agg, unit = which_unit,
+                                       measure = 'occmean', error = 'mape',
+                                       title = 'PP - mean occupancy',
+                                       subtitle = which_subtitle)
+ggsave(plt_pp_occmean_mape_diff, filename = 'mm_output/diff_plots/exp13b_pp_occmean_mape_diff.png',
+       height = plot_height, width = plot_width)
+
+plt_pp_occp95_mape_diff <- mm_paper_error_diff_plot(exp11b_exp13b_metrics_agg, unit = which_unit,
+                                      measure = 'occp95', error = 'mape',
+                                      title = 'PP - 95%ile occupancy',
+                                      subtitle = which_subtitle)
+ggsave(plt_pp_occp95_mape_diff, filename = 'mm_output/diff_plots/exp13b_pp_occp95_mape_diff.png',
+       height = plot_height, width = plot_width)
+
+
+```
+
+## OBS
+
+```{r ldr_plots}
+which_unit <- 'obs'
+which_subtitle <- 'Impact of larger scenario grid'
+
+plot_height <- 4
+plot_width <- 6
+
+plt_obs_occmean_mape_diff <- mm_paper_error_diff_plot(exp11b_exp13b_metrics_agg, unit = which_unit,
+                                       measure = 'occmean', error = 'mape',
+                                       title = 'OBS - mean occupancy',
+                                       subtitle = which_subtitle)
+ggsave(plt_obs_occmean_mape_diff, filename = 'mm_output/diff_plots/exp13b_obs_occmean_mape_diff.png',
+       height = plot_height, width = plot_width)
+
+obs_occ95_note <- 'Note: Poly model with advanced queueing terms produces non-sensical results due to overfitting.'
+plt_obs_occp95_mape_diff <- mm_paper_error_diff_plot(exp11b_exp13b_metrics_agg, unit = which_unit,
+                                      measure = 'occp95', error = 'mape',
+                                      title = 'OBS - 95%ile occupancy',
+                                      subtitle = which_subtitle, note = NULL,
+                                     ylim_ub = 0.15)
+ggsave(plt_obs_occp95_mape_diff, filename = 'mm_output/diff_plots/exp13b_obs_occp95_mape_diff.png',
+       height = plot_height, width = plot_width)
+
+plt_obs_probblocked_mae_diff <- mm_paper_error_diff_plot(exp11b_exp13b_metrics_agg, unit = which_unit,
+                                       measure = 'probblocked', error = 'mae',
+                                       title = 'OBS - probability blocked',
+                                       subtitle = which_subtitle)
+ggsave(plt_obs_probblocked_mae_diff, filename = 'mm_output/diff_plots/exp13b_obs_probblocked_mae_diff.png',
+       height = plot_height, width = plot_width)
+
+plt_obs_condmeantimeblocked_mape_diff <- mm_paper_error_diff_plot(exp11b_exp13b_metrics_agg, unit = which_unit,
+                                      measure = 'condmeantimeblocked', error = 'mape',
+                                      title = 'OBS - conditional mean time blocked',
+                                      subtitle = which_subtitle)
+ggsave(plt_obs_condmeantimeblocked_mape_diff, filename = 'mm_output/diff_plots/exp13b_obs_condmeantimeblocked_mape_diff.png',
+       height = plot_height, width = plot_width)
+```
