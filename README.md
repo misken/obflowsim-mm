@@ -66,7 +66,7 @@ total run time is probably 10-20 hours depending on the number of CPUs used.
 
 The scripts are commented and all of the folder structure needed for running
 the scripts has already been set up. There are also some R Markdown documents
-a R scripts used to produce some of the figures in the paper.
+and R scripts used to produce some of the figures in the paper.
 
         ├── exp11b_paper_plots.Rmd
         ├── exp11b_pipeline.sh
