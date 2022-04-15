@@ -2,7 +2,7 @@
 
 
 The obflowsim Python package is a discrete event simulation model built with
-SimPy of a very simple inpatient obstetrical patient flow network. In
+[SimPy](https://simpy.readthedocs.io/en/latest/) of a very simple inpatient obstetrical patient flow network. In
 addition to the DES model there are modules for related simulation
 input and output data processing including fitting of metamodels. 
 
