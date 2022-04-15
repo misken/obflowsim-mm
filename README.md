@@ -65,8 +65,23 @@ over 3000 simulation scenarios (each replicated 25 times) and the
 total run time is probably 10-20 hours depending on the number of CPUs used.
 
 The scripts are commented and all of the folder structure needed for running
-the scripts has already been set up.
+the scripts has already been set up. There are also some R Markdown documents
+a R scripts used to produce some of the figures in the paper.
 
+        ├── exp11b_paper_plots.Rmd
+        ├── exp11b_pipeline.sh
+        ├── exp11b_run.sh
+        ├── exp13bm11b_diff_plots.Rmd
+        ├── exp13b_paper_plots.Rmd
+        ├── exp13b_pipeline.sh
+        ├── exp13b_run_1001_1500.sh
+        ├── exp13b_run_1_500.sh
+        ├── exp13b_run_1501_2000.sh
+        ├── exp13b_run_2001_2500.sh
+        ├── exp13b_run_2501_3000.sh
+        ├── exp13b_run_3001_3240.sh
+        ├── exp13b_run_501_1000.sh
+        ├── exp16b_pipeline.sh
         ├── input
         │   ├── exp11b
         │   │   ├── config
