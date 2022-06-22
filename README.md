@@ -1,13 +1,13 @@
-# obflowsim - a research project
+# obflowsim-mm - a research project
 
 
-The obflowsim Python package is a discrete event simulation model built with
+The obflowsim-mm Python project is a discrete event simulation model built with
 [SimPy](https://simpy.readthedocs.io/en/latest/) of a very simple inpatient obstetrical patient flow network. In
 addition to the DES model there are modules for related simulation
 input and output data processing including fitting of metamodels. 
 
 The 
-obflowsim package was developed as part of a research project involving
+obflowsim-mm project was developed as part of a research project involving
 comparison of simulation metamodeling methods and the impact of feature
 engineering on metamodel accuracy and explainability. We are making this repository public
 so that anyone can reproduce our results and to provide full
@@ -30,9 +30,9 @@ are a few steps.
 
 ## Getting and installing obflowsim
 
-Clone the obflowsim project.
+Clone the obflowsim-mm project.
 
-    $ git clone git@github.com:misken/obflowsim.git
+    $ git clone git@github.com:misken/obflowsim-mm.git
     
 Create a conda virtual env using the `obflowsim.yml` file.
 
